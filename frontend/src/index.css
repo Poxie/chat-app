@@ -1,13 +1,18 @@
 :root {
   --primary-background: #0e1015;
   --secondary-background: #1c212c;
+  --input-background: #262d3b;
   --primary-light: #fff;
-  --primary-text: #dfdfdf;
+  --primary-text: #DCDDDE;
+  --muted-text: #72767d;
   --primary-text-with-light: #0e1015;
   --active-color: #ed4245;
   --navbar-height: 65px;
+  --controls-height: 50px;
   --speaking-color: #008dc4;
   --tooltip-background: #1c212c;
+  --sidebar-width: 350px;
+  --border-radius: 8px;
 }
 
 * {
