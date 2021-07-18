@@ -44,6 +44,18 @@
 .room-streams {
     margin: 10px;
 }
+@keyframes scale-in {
+    0% {
+        opacity: 0;
+        transform: scale(0);
+        max-width: 0;
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+        max-width: 45%;
+    }
+}
 .user {
     flex: 1 23%;
     flex-grow: 1;
@@ -58,6 +70,13 @@
 
     &.is-speaking {
         border: 4px solid var(--speaking-color);
+    }
+
+    &.connecting {
+        max-width: 0;
+        opacity: 0;
+        transform: scale(0);
+        animation: scale-in .4s forwards;
     }
     
     .stream {
@@ -95,16 +114,16 @@
     }
 
     &.disconnected {
-        transform: scale(0);
-        opacity: 0;
+        transform: scale(0) !important;
+        opacity: 0 !important;
     }
     &.shrink {
-        max-width: 0%;
+        max-width: 0% !important;
         margin: -4px !important;
     }
 }
 .letter-icon {
-    font-size: 15em;
+    font-size: 9em;
     color: var(--primary-text);
     width: 100%;
     position: absolute;

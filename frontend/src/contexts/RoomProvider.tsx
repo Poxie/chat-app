@@ -22,6 +22,7 @@ interface ContextType {
     hasCamera: boolean;
     socket: any;
     removeStream: (userId: string) => void;
+    setConnected: (userId: string) => void;
 }
 // @ts-ignore
 const RoomContext = createContext<ContextType>(null);
@@ -69,7 +70,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                 call.on('stream', userVideoStream => {
                     if(streamList[call.peer]) return;
                     streamList[call.peer] = call;
-                    setStreams(previous => [...previous, ...[{stream: userVideoStream, user, isMuted: false, hasCamera: true, disconnected: false}]]);
+                    setStreams(previous => [...previous, ...[{stream: userVideoStream, user, isMuted: false, hasCamera: true, disconnected: false, connecting: false}]]);
                 })
             })
 
@@ -114,7 +115,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                     call.on('stream', userVideoStream => {
                         if(callList[call.peer]) return;
                         userStream = userVideoStream;
-                        setStreams(previous => [...previous, ...[{stream: userVideoStream, user, isMuted: false, hasCamera: true, disconnected: false}]]);
+                        setStreams(previous => [...previous, ...[{stream: userVideoStream, user, isMuted: false, hasCamera: true, disconnected: false, connecting: true}]]);
                         callList[call.peer] = call;
                     })
                     call.on('close', () => {
@@ -169,6 +170,15 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     const removeStream = (userId: string) => {
         setStreams(previous => previous.filter(stream => stream.user.id !== userId));
     };
+    // Remove connecting status
+    const setConnected = (userId: string) => {
+        setStreams(previous => previous.map(stream => {
+            if(stream.user.id === userId) {
+                stream.connecting = false;
+            }
+            return stream;
+        }))
+    }
 
 
     const value = {
@@ -180,7 +190,8 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         removeStream,
         isMuted,
         hasCamera,
-        socket
+        socket,
+        setConnected
     }
     
     return(

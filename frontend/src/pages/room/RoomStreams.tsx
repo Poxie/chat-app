@@ -5,10 +5,6 @@ import { Stream } from "./Stream";
 
 export const RoomStreams = () => {
     const { streams } = useRoom();
-    
-    useEffect(() => {
-        console.log(streams);
-    }, [streams]);
 
     return(
         <Flex className="room-streams" flexWrap={'wrap'} justifyContent={'center'}>
@@ -20,6 +16,7 @@ export const RoomStreams = () => {
                         isMuted={stream.isMuted}
                         hasCamera={stream.hasCamera}
                         disconnected={stream.disconnected}
+                        connecting={stream.connecting}
                         key={stream.stream.id}
                     />
                 )

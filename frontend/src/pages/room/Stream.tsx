@@ -13,10 +13,11 @@ interface Props {
     hasCamera: boolean;
     disconnected?: boolean;
     isNavStream?: boolean;
+    connecting?: boolean;
 }
 
-export const Stream: React.FC<Props> = ({ stream, user, hasCamera, isMuted, disconnected, isNavStream=false }) => {
-    const { removeStream } = useRoom();
+export const Stream: React.FC<Props> = ({ stream, user, hasCamera, isMuted, disconnected, connecting, isNavStream=false }) => {
+    const { removeStream, setConnected } = useRoom();
     const ref = useRef<HTMLVideoElement | null>(null);
     const container = useRef<HTMLDivElement | null>(null);
     const [isSpeaking, setIsSpeaking] = useState(false);
@@ -50,8 +51,16 @@ export const Stream: React.FC<Props> = ({ stream, user, hasCamera, isMuted, disc
         }
     }, [disconnected]);
 
+    useEffect(() => {
+        if(connecting) {
+            setTimeout(() => {
+                setConnected(user.id);
+            }, 500);
+        }
+    }, [connecting]);
+
     return(
-        <div className={`user${isSpeaking ? ' is-speaking' : ''}${disconnected ? ' disconnected' : ''}`} ref={container}>
+        <div className={`user${isSpeaking ? ' is-speaking' : ''}${disconnected ? ' disconnected' : ''}${connecting ? ' connecting' : ''}`} ref={container}>
             {!isNavStream && (
                 <div className="user-top">
                     {isMuted && <IsMutedIcon />}

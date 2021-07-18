@@ -6,4 +6,5 @@ export interface Stream {
     isMuted: boolean;
     hasCamera: boolean;
     disconnected: boolean;
+    connecting: boolean;
 }
