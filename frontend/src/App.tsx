@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { ChatProvider } from './contexts/ChatProvider';
 import { FeedbackProvider } from './contexts/FeedbackProvider';
 import { RoomProvider } from './contexts/RoomProvider';
 import { Room } from './pages/room/Room';
@@ -11,7 +12,9 @@ function App() {
         <Route path="/:roomId" render={() => (
           <FeedbackProvider>
             <RoomProvider>
-              <Room />
+              <ChatProvider>
+                <Room />
+              </ChatProvider>
             </RoomProvider>
           </FeedbackProvider>
         )} />
