@@ -1,8 +1,11 @@
 :root {
   --primary-background: #0e1015;
+  --secondary-background: #1c212c;
   --primary-light: #fff;
-  --primary-text: #fff;
+  --primary-text: #dfdfdf;
   --primary-text-with-light: #0e1015;
+  --active-color: #ed4245;
+  --navbar-height: 61px;
 }
 
 * {
@@ -18,4 +21,21 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+.feedback-tip {
+  position: fixed;
+  bottom: -56px;
+  left: 15px;
+  background-color: var(--secondary-background);
+  padding: 15px;
+  border-radius: 5px;
+  color: var(--primary-text);
+  transition: bottom .5s;
+}
+.feedback-tip.animate-out {
+  bottom: -56px;
+}
+.feedback-tip.animate-in {
+  bottom: 15px;
 }
