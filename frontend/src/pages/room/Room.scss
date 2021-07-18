@@ -10,7 +10,7 @@
 .navbar-right {
     background-color: var(--secondary-background);
     font-size: 20px;
-    padding: 8px;
+    padding: 0 8px;
     border-radius: 0 0 0 12px;
     color: var(--primary-text);
 
@@ -24,9 +24,9 @@
     }
 }
 .self-video {
-    width: 45px;
-    min-width: 45px;
-    height: 45px;
+    width: 65px;
+    min-width: 65px;
+    height: 65px;
     border-radius: 50%;
     overflow: hidden;
     display: flex;
@@ -34,8 +34,7 @@
 
     video {
         min-height: 100%;
-        width: 135%;
-        border-radius: 50%;
+        width: 135% !important;
     }
 }
 .room-streams {
@@ -49,6 +48,11 @@
     flex-basis: 20%;
     border-radius: 12px;
     overflow: hidden;
+    border: 4px solid transparent;
+
+    &.is-speaking {
+        border: 4px solid var(--speaking-color);
+    }
     
     .stream {
         border-radius: 12px;
@@ -61,10 +65,14 @@
         top: 0;
         right: 0;
         padding: 15px;
+        z-index: 13;
 
         svg {
             fill: var(--primary-text);
-            width: 25px;
+            width: 40px;
+            background-color: rgba(0,0,0,.2);
+            border-radius: 50%;
+            padding: 8px;
         }
     }
 
