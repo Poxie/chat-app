@@ -11,7 +11,7 @@ export const RoomStreams = () => {
     }, [streams]);
 
     return(
-        <Flex className="room-streams" flexWrap={'wrap'}>
+        <Flex className="room-streams" flexWrap={'wrap'} justifyContent={'center'}>
             {streams.map((stream, key) => {
                 return(
                     <Stream 
@@ -19,7 +19,8 @@ export const RoomStreams = () => {
                         user={stream.user}
                         isMuted={stream.isMuted}
                         hasCamera={stream.hasCamera}
-                        key={key}
+                        disconnected={stream.disconnected}
+                        key={stream.stream.id}
                     />
                 )
             })}

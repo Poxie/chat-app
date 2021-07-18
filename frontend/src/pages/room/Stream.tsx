@@ -4,17 +4,21 @@ import { User } from "../../types/User";
 import { IsMutedIcon } from "./IsMutedIcon";
 import { LetterIcon } from "./LetterIcon";
 import hark from 'hark';
+import { useRoom } from "../../contexts/RoomProvider";
 
 interface Props {
     stream: MediaStream;
     user: User;
     isMuted: boolean;
     hasCamera: boolean;
-    isNavStream?: boolean
+    disconnected?: boolean;
+    isNavStream?: boolean;
 }
 
-export const Stream: React.FC<Props> = ({ stream, user, hasCamera, isMuted, isNavStream=false }) => {
+export const Stream: React.FC<Props> = ({ stream, user, hasCamera, isMuted, disconnected, isNavStream=false }) => {
+    const { removeStream } = useRoom();
     const ref = useRef<HTMLVideoElement | null>(null);
+    const container = useRef<HTMLDivElement | null>(null);
     const [isSpeaking, setIsSpeaking] = useState(false);
 
     useEffect(() => {
@@ -35,8 +39,19 @@ export const Stream: React.FC<Props> = ({ stream, user, hasCamera, isMuted, isNa
         })
     }, []);
 
+    useEffect(() => {
+        if(disconnected === true) {
+            setTimeout(() => {
+                container.current?.classList.add('shrink');
+                setTimeout(() => {
+                    removeStream(user.id);
+                }, 1000);
+            }, 400);
+        }
+    }, [disconnected]);
+
     return(
-        <div className={`user${isSpeaking ? ' is-speaking' : ''}`}>
+        <div className={`user${isSpeaking ? ' is-speaking' : ''}${disconnected ? ' disconnected' : ''}`} ref={container}>
             {!isNavStream && (
                 <div className="user-top">
                     {isMuted && <IsMutedIcon />}

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { io } from 'socket.io-client';
 import Peer from 'peerjs';
@@ -21,6 +21,7 @@ interface ContextType {
     isMuted: boolean;
     hasCamera: boolean;
     socket: any;
+    removeStream: (userId: string) => void;
 }
 // @ts-ignore
 const RoomContext = createContext<ContextType>(null);
@@ -38,6 +39,7 @@ interface Props {
 export const RoomProvider: React.FC<Props> = ({ children }) => {
     const { roomId } = useParams<Params>();
     const [selfStream, setSelfStream] = useState<MediaStream | null>(null);
+    const selfUser = useRef<any>(null);
     const [streams, setStreams] = useState<Stream[]>([]);
     const [isMuted, setIsMuted] = useState(false);
     const [hasCamera, setHasCamera] = useState(true);
@@ -47,6 +49,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     useEffect(() => {
         peer.on('open', id => {
             socket.emit('join-room', {roomId, user: {username: 'Poxen', id}})
+            selfUser.current = {username: 'Poxen', id};
         })
         // Saving all calls for when we close
         const calls: any = {};
@@ -66,7 +69,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                 call.on('stream', userVideoStream => {
                     if(streamList[call.peer]) return;
                     streamList[call.peer] = call;
-                    setStreams(previous => [...previous, ...[{stream: userVideoStream, user, isMuted: false, hasCamera: true}]]);
+                    setStreams(previous => [...previous, ...[{stream: userVideoStream, user, isMuted: false, hasCamera: true, disconnected: false}]]);
                 })
             })
 
@@ -104,14 +107,14 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                 setTimeout(() => {
                     const call = peer.call(user.id, stream, {
                         metadata: {
-                            user
+                            user: selfUser.current
                         }
                     });
                     let userStream: null | MediaStream = null;
                     call.on('stream', userVideoStream => {
                         if(callList[call.peer]) return;
                         userStream = userVideoStream;
-                        setStreams(previous => [...previous, ...[{stream: userVideoStream, user, isMuted: false, hasCamera: true}]]);
+                        setStreams(previous => [...previous, ...[{stream: userVideoStream, user, isMuted: false, hasCamera: true, disconnected: false}]]);
                         callList[call.peer] = call;
                     })
                     call.on('close', () => {
@@ -126,13 +129,26 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             })
             // Handling users leaving
             socket.on('user-disconnected', (user: User) => {
-                setStreams(previous => previous.filter(s => s.user.id != user.id));
+                console.log('User disconnected');
+                animateUserDisconnection(user.id);
                 setFeedback(`${user.username} disconnected`)
             })
         });
 
         return () => socket.close();
     }, [])
+
+    const animateUserDisconnection = useMemo(() => (userId: string) => {
+        setStreams(previous => {
+            previous.forEach(stream => {
+                console.log(stream.user.id, userId);
+                if(stream.user.id == userId) {
+                    stream.disconnected = true;
+                }
+            })
+            return previous;
+        })
+    }, [setStreams]);
 
     const toggleMute = useMemo(() => () => {
         if(!selfStream) return;
@@ -148,6 +164,12 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         socket.emit('toggle-camera', ({ roomId, hasCamera: track.enabled, streamId: selfStream.id }))
         setHasCamera(track.enabled);
     }, [selfStream, roomId]);
+    
+    // Remove stream after disconnect animation
+    const removeStream = (userId: string) => {
+        setStreams(previous => previous.filter(stream => stream.user.id !== userId));
+    };
+
 
     const value = {
         roomId,
@@ -155,6 +177,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         streams,
         toggleMute,
         toggleCamera,
+        removeStream,
         isMuted,
         hasCamera,
         socket

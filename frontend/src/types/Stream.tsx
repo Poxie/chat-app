@@ -5,4 +5,5 @@ export interface Stream {
     user: User;
     isMuted: boolean;
     hasCamera: boolean;
+    disconnected: boolean;
 }
