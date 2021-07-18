@@ -1,20 +1,31 @@
-.sidebar-main {
-    background-color: var(--primary-light);
-    position: absolute;
-    right: 0;
-    top: 0;
+.navbar-left {
+    background-color: var(--secondary-background);
+    font-size: 20px;
+    height: var(--navbar-height);
+    color: var(--primary-text);
+    padding: 8px 25px;
+    min-width: 100px;
+    border-radius: 0 0 12px 0;
+}
+.navbar-right {
+    background-color: var(--secondary-background);
     font-size: 20px;
     padding: 8px;
     border-radius: 0 0 0 12px;
-    color: var(--primary-text-with-light);
+    color: var(--primary-text);
 
     .time {
         margin: 0 20px;
         font-weight: 600;
     }
+    .letter-icon {
+        font-size: 16px;
+        background-color: var(--primary-background);
+    }
 }
 .self-video {
     width: 45px;
+    min-width: 45px;
     height: 45px;
     border-radius: 50%;
     overflow: hidden;
@@ -30,13 +41,71 @@
 .room-streams {
     margin: 10px;
 }
-.stream {
+.user {
     flex: 1;
     margin: 10px;
-    border-radius: 15px;
+    position: relative;
+    max-height: 90vh;
+    flex-basis: 20%;
+    border-radius: 12px;
     overflow: hidden;
+    
+    .stream {
+        border-radius: 12px;
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .user-top {
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 15px;
+
+        svg {
+            fill: var(--primary-text);
+            width: 25px;
+        }
+    }
 
     video {
         width: 100%;
+    }
+    
+    .username {
+        position: absolute;
+        bottom: 0;
+        color: var(--primary-text);
+        padding: 15px;
+        font-weight: 600;
+    }
+}
+.letter-icon {
+    font-size: 15em;
+    color: var(--primary-text);
+    width: 100%;
+    position: absolute;
+    background-color: var(--secondary-background);
+    height: 100%;
+}
+.controls {
+    position: absolute;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    .control-btn {
+        border-radius: 50%;
+        background-color: var(--secondary-background);
+        width: 50px;
+        height: 50px;
+        margin: 0 10px;
+
+        &.active-btn {
+            background-color: var(--active-color);
+        }
+    }
+    svg {
+        fill: var(--primary-text);
+        width: 30px;
     }
 }

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Flex } from "../../components/Flex";
 import { useRoom } from "../../contexts/RoomProvider";
+import { Stream } from "./Stream";
 
 const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const fetchReadableDay = (day: number) => {
@@ -20,19 +21,10 @@ const getReadableTime = () => {
     return strTime;
 }
 
-export const Sidebar = () => {
-    const { selfStream } = useRoom();
-    const stream = useRef<null | HTMLVideoElement>(null);
+export const Navbar = () => {
+    const { selfStream, roomId, hasCamera, isMuted } = useRoom();
     const [time, setTime] = useState(getReadableTime());
     const currentTime = useRef(getReadableTime());
-
-    useEffect(() => {
-        if(!stream.current) return;
-        stream.current.srcObject = selfStream;
-        stream.current.addEventListener('loadedmetadata', () => {
-            stream.current?.play();
-        })
-    }, [selfStream]);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -48,15 +40,23 @@ export const Sidebar = () => {
 
     const date = new Date();
     return(
-        <Flex className="sidebar" alignItems={'center'}>
-            <Flex className="sidebar-main" alignItems={'center'}>
+        <Flex className="navbar" alignItems={'center'} justifyContent={'space-between'}>
+            <Flex className="navbar-left" alignItems={'center'}>
+                <span>{roomId}</span>
+            </Flex>
+            <Flex className="navbar-right" alignItems={'center'}>
                 <div className="time">
                     <span>
                         {getReadableTime()}
                     </span>
                 </div>
                 <div className="self-video">
-                    <video muted src={undefined} ref={stream}></video>
+                    <Stream 
+                        hasCamera={hasCamera}
+                        isMuted={isMuted}
+                        stream={selfStream}
+                        user={{username: 'Poxen', id: '123213'}}
+                    />
                 </div>
             </Flex>
         </Flex>
