@@ -20,6 +20,7 @@ interface ContextType {
     toggleCamera: () => void;
     isMuted: boolean;
     hasCamera: boolean;
+    socket: any;
 }
 // @ts-ignore
 const RoomContext = createContext<ContextType>(null);
@@ -155,7 +156,8 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         toggleMute,
         toggleCamera,
         isMuted,
-        hasCamera
+        hasCamera,
+        socket
     }
     
     return(
