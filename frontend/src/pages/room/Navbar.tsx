@@ -51,12 +51,15 @@ export const Navbar = () => {
                     </span>
                 </div>
                 <div className="self-video">
-                    <Stream 
-                        hasCamera={hasCamera}
-                        isMuted={isMuted}
-                        stream={selfStream}
-                        user={{username: 'Poxen', id: '123213'}}
-                    />
+                    {selfStream && (
+                        <Stream 
+                            hasCamera={hasCamera}
+                            isMuted={isMuted}
+                            stream={selfStream}
+                            user={{username: 'Poxen', id: '123213'}}
+                            isNavStream={true}
+                        />
+                    )}
                 </div>
             </Flex>
         </Flex>

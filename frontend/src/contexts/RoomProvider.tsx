@@ -13,7 +13,7 @@ const peer = new Peer(undefined, {
 
 interface ContextType {
     roomId: string | undefined;
-    selfStream: MediaStream;
+    selfStream: MediaStream | null;
     streams: Stream[];
     toggleMute: () => void;
     toggleCamera: () => void;
@@ -35,8 +35,7 @@ interface Props {
 }
 export const RoomProvider: React.FC<Props> = ({ children }) => {
     const { roomId } = useParams<Params>();
-    // @ts-ignore
-    const [selfStream, setSelfStream] = useState<MediaStream>(null);
+    const [selfStream, setSelfStream] = useState<MediaStream | null>(null);
     const [streams, setStreams] = useState<Stream[]>([]);
     const [isMuted, setIsMuted] = useState(false);
     const [hasCamera, setHasCamera] = useState(true);
