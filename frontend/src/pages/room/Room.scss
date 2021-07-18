@@ -37,6 +37,10 @@
         width: 135% !important;
     }
 }
+.room-view {
+    width: 100%;
+    display: flex;
+}
 .room-streams {
     margin: 10px;
 }
@@ -101,6 +105,10 @@
     bottom: 25px;
     left: 50%;
     transform: translateX(-50%);
+    width: 100%;
+    padding: 0 15px;
+    z-index: 14;
+
     .control-btn {
         border-radius: 50%;
         background-color: var(--secondary-background);
@@ -116,4 +124,88 @@
         fill: var(--primary-text);
         width: 30px;
     }
+}
+
+.sidebar ~ div {
+    width: 100%;
+    transition: width .4s;
+}
+.sidebar {
+    background-color: var(--secondary-background);
+    width: var(--sidebar-width);
+    border-radius: var(--border-radius);
+    position: fixed;
+    right: calc(0px - var(--sidebar-width));
+    height: calc(100vh - var(--navbar-height) - 50px);
+    top: calc(var(--navbar-height) + 25px);
+    transition: right .4s;
+    z-index: 14;
+    padding: 15px;
+
+    &.open {
+        right: 25px;
+
+        & ~ div {
+            width: calc(100% - var(--sidebar-width) - 50px);
+        }
+        & ~ .controls {
+            width: calc(100% - var(--sidebar-width) * 2 - 50px);
+        }
+    }
+}
+
+.header {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--primary-text);
+    margin-bottom: 12px;
+}
+.chat {
+    height: 100%;
+}
+.messages {
+    height: 100%;
+    max-height: 91%;
+    overflow: auto;
+    padding-bottom: 15px;
+}
+.messages::-webkit-scrollbar {
+    width: 8px;
+}
+.messages::-webkit-scrollbar-thumb {
+    background-color: var(--input-background);
+    border-radius: 8px;
+}
+.message {
+    color: var(--primary-text);
+    padding: 3px 0;
+    position: relative;
+}
+.message.has-author {
+    margin-top: 12px;
+}
+.message .letter-icon {
+    width: 42px;
+    height: 42px;
+    font-size: 22px;
+    background-color: var(--input-background);
+    border-radius: 50%;
+}
+.message-top {
+    margin-bottom: 3px;
+
+    .author {
+        color: var(--primary-light);
+        font-weight: 600;
+    }
+}
+.message-main {
+    padding-left: 58px;
+}
+.message .timestamp {
+    font-size: 0.85rem;
+    line-height: 1.325rem;
+    color: var(--muted-text);
+    margin-left: 10px;
+    font-weight: 600;
 }

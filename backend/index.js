@@ -27,6 +27,10 @@ io.on('connection', socket => {
         console.log('received toggle camera')
         socket.broadcast.to(roomId).emit('toggle-camera', ({ streamId, hasCamera }));
     })
+    socket.on('send-message', ({ roomId, content, author }) => {
+        console.log('received message');
+        io.in(roomId).emit('send-message', ({ content, author, date: Date.now() }));
+    })
 })
 
 server.listen(3001);
