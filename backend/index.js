@@ -14,6 +14,10 @@ io.on('connection', socket => {
     socket.on('join-room', ({ roomId, user }) => {
         socket.join(roomId);
         socket.broadcast.to(roomId).emit('user-connected', user);
+
+        socket.on('disconnect', () => {
+            socket.broadcast.to(roomId).emit('user-disconnected', user);
+        })
     })
     socket.on('toggle-mute', ({ roomId, isMuted, streamId }) => {
         console.log('received toggle mute')

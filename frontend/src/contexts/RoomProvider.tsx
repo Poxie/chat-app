@@ -45,6 +45,8 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         peer.on('open', id => {
             socket.emit('join-room', {roomId, user: {username: 'Poxen', id}})
         })
+        // Saving all calls for when we close
+        const calls: any = {};
 
         // Asking user for webcam and mic
         navigator.mediaDevices.getUserMedia({
@@ -113,7 +115,13 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                     call.on('error', error => {
                         console.log(error);
                     })
+                    
+                    calls[user.id] = call;
                 }, 1000);
+            })
+            // Handling users leaving
+            socket.on('user-disconnected', (user: User) => {
+                setStreams(previous => previous.filter(s => s.user.id != user.id));
             })
         });
 
