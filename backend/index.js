@@ -15,6 +15,14 @@ io.on('connection', socket => {
         socket.join(roomId);
         socket.broadcast.to(roomId).emit('user-connected', user);
     })
+    socket.on('toggle-mute', ({ roomId, isMuted, streamId }) => {
+        console.log('received toggle mute')
+        socket.broadcast.to(roomId).emit('toggle-mute', ({ streamId, isMuted }));
+    })
+    socket.on('toggle-camera', ({ roomId, hasCamera, streamId }) => {
+        console.log('received toggle camera')
+        socket.broadcast.to(roomId).emit('toggle-camera', ({ streamId, hasCamera }));
+    })
 })
 
 server.listen(3001);
