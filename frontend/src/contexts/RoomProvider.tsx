@@ -4,6 +4,7 @@ import { io } from 'socket.io-client';
 import Peer from 'peerjs';
 import { User } from "../types/User";
 import { Stream } from "../types/Stream";
+import { useFeedback } from "./FeedbackProvider";
 
 const socket: any = io('http://localhost:3001');
 const peer = new Peer(undefined, {
@@ -40,6 +41,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     const [isMuted, setIsMuted] = useState(false);
     const [hasCamera, setHasCamera] = useState(true);
     const [forceUpdate, setForceUpdate] = useState(0);
+    const { setFeedback } = useFeedback();
 
     useEffect(() => {
         peer.on('open', id => {
@@ -96,6 +98,8 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             let callList: any = {};
             socket.on('user-connected', (user: User) => {
                 console.log(`User connected: ${user.id}`)
+                setFeedback(`${user.username} connected`)
+
                 setTimeout(() => {
                     const call = peer.call(user.id, stream, {
                         metadata: {
@@ -122,6 +126,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             // Handling users leaving
             socket.on('user-disconnected', (user: User) => {
                 setStreams(previous => previous.filter(s => s.user.id != user.id));
+                setFeedback(`${user.username} disconnected`)
             })
         });
 
