@@ -48,7 +48,7 @@ export const Stream: React.FC<Props> = ({ stream, user, hasCamera, isMuted, isNa
                         username={user.username}
                     />
                 )}
-                <video ref={ref}></video>
+                <video ref={ref} muted={isNavStream}></video>
             </Flex>
             {!isNavStream && (
                 <div className="username">
