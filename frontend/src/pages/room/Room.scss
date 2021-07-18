@@ -1,0 +1,42 @@
+.sidebar-main {
+    background-color: var(--primary-light);
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: 20px;
+    padding: 8px;
+    border-radius: 0 0 0 12px;
+    color: var(--primary-text-with-light);
+
+    .time {
+        margin: 0 20px;
+        font-weight: 600;
+    }
+}
+.self-video {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+
+    video {
+        min-height: 100%;
+        width: 135%;
+        border-radius: 50%;
+    }
+}
+.room-streams {
+    margin: 10px;
+}
+.stream {
+    flex: 1;
+    margin: 10px;
+    border-radius: 15px;
+    overflow: hidden;
+
+    video {
+        width: 100%;
+    }
+}
