@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { memo, useEffect, useMemo, useRef, useState } from "react"
 import { Flex } from "../../components/Flex";
 import { User } from "../../types/User";
 import { IsMutedIcon } from "./IsMutedIcon";
 import { LetterIcon } from "./LetterIcon";
-import hark from 'hark';
 import { useRoom } from "../../contexts/RoomProvider";
+import { StreamVideo } from "./StreamVideo";
 
 interface Props {
     stream: MediaStream;
@@ -14,7 +14,7 @@ interface Props {
     orderId?: number;
     disconnected?: boolean;
     container?: any;
-    isNavStream?: boolean;
+    isSelfStream?: boolean;
     connecting?: boolean;
     streamAmount?: number;
 }
@@ -30,39 +30,12 @@ const chunkArray = (streamAmount: number, rowAmount: number) => {
         })
     );
 }
-const ITEM_DIVIDERS: any = {
-    2: 2,
-    3: 1.57,
-    4: 1.31,
-    5: 1.22,
-    6: 1.091,
-    7: 1.05
-}
 const RATIO = 0.7492063492;
 const SPACING = 10;
-export const Stream: React.FC<Props> = ({ stream, user, hasCamera, isMuted, disconnected, connecting, orderId, container: streamContainer, isNavStream=false, streamAmount }) => {
+export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted, disconnected, connecting, orderId, container: streamContainer, isSelfStream=false, streamAmount }) => {
     const { removeStream, setConnected } = useRoom();
-    const ref = useRef<HTMLVideoElement | null>(null);
     const container = useRef<HTMLDivElement | null>(null);
     const [isSpeaking, setIsSpeaking] = useState(false);
-
-    useEffect(() => {
-        if(!ref.current) return;
-        
-        ref.current.srcObject = stream;
-        ref.current.addEventListener('loadedmetadata', () => {
-            ref.current?.play();
-            if(!ref.current) return;
-            const speechEvents = hark(stream);
-
-            speechEvents.on('speaking', () => {
-                setIsSpeaking(true);
-            })
-            speechEvents.on('stopped_speaking', () => {
-                setIsSpeaking(false);
-            })
-        })
-    }, []);
 
     useEffect(() => {
         if(disconnected === true) {
@@ -148,7 +121,7 @@ export const Stream: React.FC<Props> = ({ stream, user, hasCamera, isMuted, disc
 
     return(
         <div data-order={orderId} className={`user${isSpeaking ? ' is-speaking' : ''}${disconnected ? ' disconnected' : ''}${connecting ? ' connecting' : ''}`} ref={container}>
-            {!isNavStream && (
+            {!isSelfStream && (
                 <div className="user-top">
                     {isMuted && <IsMutedIcon />}
                 </div>
@@ -159,13 +132,17 @@ export const Stream: React.FC<Props> = ({ stream, user, hasCamera, isMuted, disc
                         username={user.username}
                     />
                 )}
-                <video ref={ref} muted={isNavStream}></video>
+                <StreamVideo 
+                    setIsSpeaking={setIsSpeaking}
+                    stream={stream}
+                    isSelfStream={isSelfStream}
+                />
             </Flex>
-            {!isNavStream && (
+            {!isSelfStream && (
                 <div className="username">
                     {user.username}
                 </div>
             )}
         </div>
     )
-}
+});

@@ -44,7 +44,7 @@ export const RoomStreams = () => {
                             streamAmount={streams.length}
                             orderId={key}
                             container={ref}
-                            key={Math.random()}
+                            key={stream.stream.id}
                         />
                     )
                 })}

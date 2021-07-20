@@ -57,7 +57,7 @@ export const Navbar = () => {
                             isMuted={isMuted}
                             stream={selfStream}
                             user={{username: 'Poxen', id: '123213'}}
-                            isNavStream={true}
+                            isSelfStream={true}
                         />
                     )}
                 </div>

@@ -7,10 +7,6 @@ import { Stream } from "../types/Stream";
 import { useFeedback } from "./FeedbackProvider";
 
 const socket: any = io('http://localhost:3001');
-const peer = new Peer(undefined, {
-    host: '/',
-    port: 3002
-})
 
 interface ContextType {
     roomId: string | undefined;
@@ -23,6 +19,8 @@ interface ContextType {
     socket: any;
     removeStream: (userId: string) => void;
     setConnected: (userId: string) => void;
+    joinRoom: () => void;
+    isConnected: boolean;
 }
 // @ts-ignore
 const RoomContext = createContext<ContextType>(null);
@@ -45,13 +43,32 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     const [isMuted, setIsMuted] = useState(false);
     const [hasCamera, setHasCamera] = useState(true);
     const [forceUpdate, setForceUpdate] = useState(0);
+    const [isConnected, setIsConnected] = useState(false);
     const { setFeedback } = useFeedback();
 
     useEffect(() => {
+        navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: true
+        }).then(stream => {
+            setSelfStream(stream)
+        });
+    }, []);
+    const joinRoom = useMemo(() => () => {
+        setIsConnected(true);
+        initiateRoomConnection();
+    }, []);
+    const initiateRoomConnection = () => {
+        const peer = new Peer(undefined, {
+            host: '/',
+            port: 3002
+        })
         peer.on('open', id => {
+            console.log(id);
             socket.emit('join-room', {roomId, user: {username: 'Poxen', id}})
             selfUser.current = {username: 'Poxen', id};
         })
+        peer.on('error', console.error);
         // Saving all calls for when we close
         const calls: any = {};
 
@@ -134,10 +151,8 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                 animateUserDisconnection(user.id);
                 setFeedback(`${user.username} disconnected`)
             })
-        });
-
-        return () => socket.close();
-    }, [])
+        }).catch(console.error);
+    };
 
     const animateUserDisconnection = useMemo(() => (userId: string) => {
         setStreams(previous => {
@@ -152,6 +167,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     }, [setStreams]);
 
     const toggleMute = useMemo(() => () => {
+        console.log('test')
         if(!selfStream) return;
         const track = selfStream.getAudioTracks()[0];
         track.enabled = !track.enabled;
@@ -191,7 +207,9 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         isMuted,
         hasCamera,
         socket,
-        setConnected
+        setConnected,
+        joinRoom,
+        isConnected
     }
     
     return(
