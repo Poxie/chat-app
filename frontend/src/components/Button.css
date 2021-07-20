@@ -1,0 +1,21 @@
+.button {
+    padding: 8px 15px;
+    font-size: 20px;
+    font-weight: 500;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: opacity .2s;
+    text-align: center;
+}
+.button:hover {
+    opacity: .8;
+}
+.button.rounded {
+    border-radius: 120px;
+}
+.button.primary {
+    background-color: var(--primary-color);
+}
+.button.secondary {
+    background-color: var(--secondary-background);
+}
