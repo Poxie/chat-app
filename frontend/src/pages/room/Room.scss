@@ -39,10 +39,17 @@
 }
 .room-view {
     width: 100%;
+    height: calc(100vh - var(--navbar-height) - var(--controls-height) - 50px);
     display: flex;
 }
 .room-streams {
     margin: 10px;
+    max-width: 100%;
+    // width: 1600px;
+    width: 100%;
+    align-items: center;
+    height: 100%;
+    position: relative;
 }
 @keyframes scale-in {
     0% {
@@ -57,16 +64,16 @@
     }
 }
 .user {
-    flex: 1 23%;
-    flex-grow: 1;
+    // flex: 1 calc((100% / var(--row-items) - 50px));
+    // max-width: 55%;
+    // width: calc((100% / var(--row-items) - 50px));
+    // flex-grow: 1;
     margin: 10px;
-    max-width: 45%;
-    position: relative;
-    max-height: 90vh;
+    position: absolute;
     border-radius: 12px;
     overflow: hidden;
     border: 4px solid transparent;
-    transition: transform .5s, opacity .5s, max-width .4s, margin .4s;
+    transition: transform .5s, opacity .5s, max-width .4s, margin .4s, width .5s, top .5s, left .5s;
 
     &.is-speaking {
         border: 4px solid var(--speaking-color);

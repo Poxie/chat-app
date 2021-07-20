@@ -13,6 +13,9 @@
   --tooltip-background: #1c212c;
   --sidebar-width: 350px;
   --border-radius: 8px;
+  --max-user-width: 23%;
+  --stream-container-width: 100%;
+  --row-items: 1;
 }
 
 * {
@@ -23,6 +26,7 @@ body {
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;
   background-color: var(--primary-background);
+  overflow: hidden;
 }
 
 code {
