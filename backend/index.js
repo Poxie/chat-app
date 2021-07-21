@@ -12,21 +12,25 @@ const io = require('socket.io')(server, {
 
 const rooms = {};
 io.on('connection', socket => {
+    let isInRoom = false;
     socket.on('join-room', ({ roomId, user, isMuted, hasCamera }) => {
         socket.join(roomId);
+        isInRoom = true;
         socket.broadcast.to(roomId).emit('user-connected', {user, isMuted, hasCamera});
         if(!rooms[roomId]) rooms[roomId] = {members: 0};
         if(rooms[roomId]) rooms[roomId].members++;
 
         socket.on('disconnect', () => {
-            if(rooms[roomId]) rooms[roomId].members--;
+            console.log(socket.rooms);
+            if(rooms[roomId] && isInRoom) rooms[roomId].members--;
             socket.broadcast.to(roomId).emit('user-disconnected', user);
         })
     })
     socket.on('leave-room', ({ roomId, user }) => {
-        socket.broadcast.to(roomId).emit('user-disconnected', user);
         if(rooms[roomId]) rooms[roomId].members--;
+        socket.broadcast.to(roomId).emit('user-disconnected', user);
         socket.leave(roomId);
+        isInRoom = false;
     })
     socket.on('toggle-mute', ({ roomId, isMuted, streamId }) => {
         console.log('received toggle mute')
