@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Flex } from "../../components/Flex";
+import { useAuthentication } from "../../contexts/AuthenticationProvider";
 import { useRoom } from "../../contexts/RoomProvider";
 import { Stream } from "./Stream";
 
@@ -23,6 +24,7 @@ const getReadableTime = () => {
 
 export const Navbar = () => {
     const { selfStream, roomId, hasCamera, isMuted } = useRoom();
+    const { user } = useAuthentication();
     const [time, setTime] = useState(getReadableTime());
     const currentTime = useRef(getReadableTime());
 
@@ -56,7 +58,7 @@ export const Navbar = () => {
                             hasCamera={hasCamera}
                             isMuted={isMuted}
                             stream={selfStream}
-                            user={{username: 'Poxen', id: '123213'}}
+                            user={{username: user.username, id: JSON.stringify(Math.random())}}
                             isSelfStream={true}
                         />
                     )}
