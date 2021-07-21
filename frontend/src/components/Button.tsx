@@ -12,8 +12,8 @@ interface Props {
 export const Button: React.FC<Props> = ({ children, type='primary', style, rounded, onClick }) => {
     const className = `button ${type}${rounded ? ' rounded' : ''}`;
     return(
-        <Clickable onClick={onClick} className={className}>
-            <div className={`button-content`} style={style}>
+        <Clickable onClick={onClick} className={className} style={style}>
+            <div className={`button-content`}>
                 {children}
             </div>
         </Clickable>
