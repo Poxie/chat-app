@@ -77,6 +77,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             selfUser.current = {username: 'Poxen', id};
         })
         peer.on('error', console.error);
+
         // Saving all calls for when we close 
         const calls: any = {};
 
@@ -94,6 +95,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                 if(!hasCameraRef.current) stream.getVideoTracks()[0].enabled = false;
                 call.answer(stream);
                 const user: User = call.metadata.user;
+                const { isMuted, hasCamera } = call.metadata;
 
                 call.on('stream', userVideoStream => {
                     if(streamList[call.peer]) return;
