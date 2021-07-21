@@ -221,7 +221,7 @@
     &.open {
         right: 25px;
 
-        &~div {
+        &~div:not(.controls) {
             width: calc(100% - var(--sidebar-width) - 25px);
         }
     }
