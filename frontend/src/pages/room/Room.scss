@@ -190,6 +190,17 @@
     width: 100%;
     padding: 0 15px;
     z-index: 14;
+    height: var(--controls-height);
+
+    .center {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    .right {
+        position: absolute;
+        right: 20px;
+    }
 }
 .control-btn {
     border-radius: 50%;
