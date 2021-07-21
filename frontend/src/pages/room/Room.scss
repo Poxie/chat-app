@@ -76,10 +76,16 @@
         margin-top: -25px;
         margin-left: 60px;
     }
+    .silent {
+        color: var(--muted-text);
+        font-weight: 600;
+        margin-top: 10px;
+        font-size: 16px;
+    }
     .button {
         padding: 12px 0;
         width: 150px;
-        margin-top: 20px;
+        margin-top: 30px;
         font-size: 16px;
     }
     .user {
