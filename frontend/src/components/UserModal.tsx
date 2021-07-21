@@ -27,6 +27,7 @@ export const UserModal: React.FC<Props> = ({ onSave }) => {
             <Input 
                 placeholder={'Choose a username...'}
                 onChange={setUsername}
+                onSubmit={handleSubmit}
             />
             <Button onClick={handleSubmit} style={{marginTop: '15px'}}>
                 Enter
