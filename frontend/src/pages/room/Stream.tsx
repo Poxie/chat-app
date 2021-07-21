@@ -5,6 +5,7 @@ import { IsMutedIcon } from "./IsMutedIcon";
 import { LetterIcon } from "./LetterIcon";
 import { useRoom } from "../../contexts/RoomProvider";
 import { StreamVideo } from "./StreamVideo";
+import { useChat } from "../../contexts/ChatProvider";
 
 interface Props {
     stream: MediaStream;
@@ -34,6 +35,7 @@ const RATIO = 0.7492063492;
 const SPACING = 10;
 export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted, disconnected, connecting, orderId, container: streamContainer, isSelfStream=false, streamAmount }) => {
     const { removeStream, setConnected } = useRoom();
+    const { open } = useChat();
     const container = useRef<HTMLDivElement | null>(null);
     const [isSpeaking, setIsSpeaking] = useState(false);
 
@@ -99,13 +101,16 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
         const containerHeight = streamContainer.current.offsetHeight - ((SPACING * 2) * amountOfRows);
         const availableWidth = containerWidth - (streamAmount * SPACING + SPACING * 6);
 
+        // Styling stream
         const style = container.current.style;
+
         // Setting width of stream
         const width = determineWidth(isEven, availableWidth, rowAmount, amountOfRows, containerHeight);
         style.width = `${width}px`;
         const currentRow = amountOfRows === 1 ? 0 : Math.floor((orderId / rowAmount));
         console.log(amountOfRows, currentRow, rowAmount);
         const rowIndex = currentRow !== 0 ? orderId - (rowAmount * currentRow - 1) : orderId + 1;
+
         // Setting position of element
         const left = determineLeft(width, containerWidth, rowIndex, orderId, rowAmount, currentRow);
         style.left = `${left}px`;
@@ -118,6 +123,9 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
         return () => window.removeEventListener('resize', resizeStreams);
     }, [streamAmount]);
     useEffect(resizeStreams, [streamAmount, orderId]);
+    useEffect(() => {
+        setTimeout(resizeStreams, 300);
+    }, [open]);
 
     return(
         <div data-order={orderId} className={`user${isSpeaking ? ' is-speaking' : ''}${disconnected ? ' disconnected' : ''}${connecting ? ' connecting' : ''}`} ref={container}>

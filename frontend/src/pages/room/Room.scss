@@ -212,7 +212,7 @@
     border-radius: var(--border-radius);
     position: fixed;
     right: calc(0px - var(--sidebar-width));
-    height: calc(100vh - var(--navbar-height) - 50px);
+    height: calc(100vh - var(--navbar-height) - var(--controls-height) - 75px);
     top: calc(var(--navbar-height) + 25px);
     transition: right .4s;
     z-index: 14;
@@ -221,11 +221,8 @@
     &.open {
         right: 25px;
 
-        & ~ div {
-            width: calc(100% - var(--sidebar-width) - 50px);
-        }
-        & ~ .controls {
-            width: calc(100% - var(--sidebar-width) * 2 - 50px);
+        &~div {
+            width: calc(100% - var(--sidebar-width) - 25px);
         }
     }
 }
