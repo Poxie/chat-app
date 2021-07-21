@@ -5,6 +5,8 @@ import Peer from 'peerjs';
 import { User } from "../types/User";
 import { Stream } from "../types/Stream";
 import { useFeedback } from "./FeedbackProvider";
+import { Params } from "../types/Params";
+import { useAuthentication } from "./AuthenticationProvider";
 
 const socket: any = io('http://localhost:3001');
 
@@ -30,14 +32,12 @@ export const useRoom = () => {
     return useContext(RoomContext);
 }
 
-interface Params {
-    roomId: string | undefined
-}
 interface Props {
     children: any;
 }
 export const RoomProvider: React.FC<Props> = ({ children }) => {
     const { roomId } = useParams<Params>();
+    const { user } = useAuthentication();
     const [selfStream, setSelfStream] = useState<MediaStream | null>(null);
     const selfUser = useRef<any>(null);
     const [streams, setStreams] = useState<Stream[]>([]);
@@ -60,7 +60,8 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     const leaveRoom = useMemo(() => () => {
         setIsConnected(false);
         setStreams([]);
-        socket.emit('leave-room', {roomId, user: {username: 'Poxen', id: selfUser.current.id}});
+        const { id, username } = selfUser.current;
+        socket.emit('leave-room', {roomId, user: {username, id}});
     }, [setIsConnected, roomId]);
     const joinRoom = useMemo(() => () => {
         setIsConnected(true);
@@ -73,8 +74,8 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         })
         peer.on('open', id => {
             console.log(id);
-            socket.emit('join-room', {roomId, isMuted: isMutedRef.current, hasCamera: hasCameraRef.current, user: {username: 'Poxen', id}})
-            selfUser.current = {username: 'Poxen', id};
+            selfUser.current = {username: user?.username, id};
+            socket.emit('join-room', {roomId, isMuted: isMutedRef.current, hasCamera: hasCameraRef.current, user: {username: selfUser.current.username, id}})
         })
         peer.on('error', console.error);
 

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { Button } from "../../components/Button";
 import { Clickable } from "../../components/Clickable";
 import { Flex } from "../../components/Flex";
+import { useAuthentication } from "../../contexts/AuthenticationProvider";
 import { useRoom } from "../../contexts/RoomProvider";
 import { User } from "../../types/User";
 import { CameraButton } from "./CameraButton";
@@ -11,6 +12,7 @@ import { Stream } from "./Stream";
 
 export const WaitingRoom = () => {
     const { selfStream, hasCamera, isMuted, toggleCamera, toggleMute, joinRoom, socket, roomId } = useRoom();
+    const { user } = useAuthentication();
     const [members, setMembers] = useState<null | number>(null);
 
     useEffect(() => {
@@ -35,7 +37,7 @@ export const WaitingRoom = () => {
                             hasCamera={hasCamera}
                             isMuted={isMuted}
                             stream={selfStream}
-                            user={{username: 'Poxen', id: String(Math.random())}}
+                            user={{username: user.username, id: JSON.stringify(Math.random())}}
                             isSelfStream={true}
                         />
                     )}
