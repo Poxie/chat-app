@@ -23,7 +23,7 @@ export const Messages: React.FC<Props> = ({ messages }) => {
                             author={message.author}
                             content={message.content}
                             date={message.date}
-                            hasAuthor={messages[key - 1]?.author.username !== message.author.username}
+                            hasAuthor={messages[key - 1]?.author.id !== message.author.id}
                         />
                     )
                 })}
