@@ -20,7 +20,7 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
     const [open, setOpen] = useState(false);
 
     const sendMessage = useMemo(() => (value: string) => {
-        socket.emit('send-message', ({ roomId, content: value, author: {username: user?.username}}));
+        socket.emit('send-message', ({ roomId, content: value, author: {username: user.username, id: socket.id}}));
     }, []);
 
     useEffect(() => {
