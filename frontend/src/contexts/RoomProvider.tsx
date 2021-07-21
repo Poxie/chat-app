@@ -73,11 +73,11 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         })
         peer.on('open', id => {
             console.log(id);
-            socket.emit('join-room', {roomId, user: {username: 'Poxen', id}})
+            socket.emit('join-room', {roomId, isMuted: isMutedRef.current, hasCamera: hasCameraRef.current, user: {username: 'Poxen', id}})
             selfUser.current = {username: 'Poxen', id};
         })
         peer.on('error', console.error);
-        // Saving all calls for when we close
+        // Saving all calls for when we close 
         const calls: any = {};
 
         // Asking user for webcam and mic
@@ -87,15 +87,18 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         }).then(stream => {
             setSelfStream(stream)
 
+            // Answer calls if received
             let streamList: any = {};
             peer.on('call', call => {
+                if(isMutedRef.current) stream.getAudioTracks()[0].enabled = false;
+                if(!hasCameraRef.current) stream.getVideoTracks()[0].enabled = false;
                 call.answer(stream);
                 const user: User = call.metadata.user;
-                const { isMuted, hasCamera } = call.metadata;
 
                 call.on('stream', userVideoStream => {
                     if(streamList[call.peer]) return;
                     streamList[call.peer] = call;
+
                     setStreams(previous => [...previous, ...[{stream: userVideoStream, user, isMuted, hasCamera, disconnected: false, connecting: false}]]);
                 })
             })
@@ -127,7 +130,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
 
             // Handling users joining
             let callList: any = {};
-            socket.on('user-connected', (user: User) => {
+            socket.on('user-connected', ({ user, isMuted, hasCamera }: any) => {
                 console.log(`User connected: ${user.id}`)
                 setFeedback(`${user.username} connected`)
 
@@ -143,7 +146,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                     call.on('stream', userVideoStream => {
                         if(callList[call.peer]) return;
                         userStream = userVideoStream;
-                        setStreams(previous => [...previous, ...[{stream: userVideoStream, user, isMuted: false, hasCamera: true, disconnected: false, connecting: true}]]);
+                        setStreams(previous => [...previous, ...[{stream: userVideoStream, user, isMuted, hasCamera, disconnected: false, connecting: true}]]);
                         callList[call.peer] = call;
                     })
                     call.on('close', () => {

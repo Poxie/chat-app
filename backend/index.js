@@ -11,13 +11,17 @@ const io = require('socket.io')(server, {
 });
 
 io.on('connection', socket => {
-    socket.on('join-room', ({ roomId, user }) => {
+    socket.on('join-room', ({ roomId, user, isMuted, hasCamera }) => {
         socket.join(roomId);
-        socket.broadcast.to(roomId).emit('user-connected', user);
+        socket.broadcast.to(roomId).emit('user-connected', {user, isMuted, hasCamera});
 
         socket.on('disconnect', () => {
             socket.broadcast.to(roomId).emit('user-disconnected', user);
         })
+    })
+    socket.on('leave-room', ({ roomId, user }) => {
+        socket.broadcast.to(roomId).emit('user-disconnected', user);
+        socket.leave(roomId);
     })
     socket.on('toggle-mute', ({ roomId, isMuted, streamId }) => {
         console.log('received toggle mute')
