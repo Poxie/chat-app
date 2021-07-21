@@ -20,6 +20,7 @@ interface ContextType {
     removeStream: (userId: string) => void;
     setConnected: (userId: string) => void;
     joinRoom: () => void;
+    leaveRoom: () => void;
     isConnected: boolean;
 }
 // @ts-ignore
@@ -42,6 +43,8 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     const [streams, setStreams] = useState<Stream[]>([]);
     const [isMuted, setIsMuted] = useState(false);
     const [hasCamera, setHasCamera] = useState(true);
+    const isMutedRef = useRef(false);
+    const hasCameraRef = useRef(true);
     const [forceUpdate, setForceUpdate] = useState(0);
     const [isConnected, setIsConnected] = useState(false);
     const { setFeedback } = useFeedback();
@@ -54,10 +57,15 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             setSelfStream(stream)
         });
     }, []);
+    const leaveRoom = useMemo(() => () => {
+        setIsConnected(false);
+        setStreams([]);
+        socket.emit('leave-room', {roomId, user: {username: 'Poxen', id: selfUser.current.id}});
+    }, [setIsConnected, roomId]);
     const joinRoom = useMemo(() => () => {
         setIsConnected(true);
         initiateRoomConnection();
-    }, []);
+    }, [setIsConnected]);
     const initiateRoomConnection = () => {
         const peer = new Peer(undefined, {
             host: '/',
@@ -83,11 +91,12 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             peer.on('call', call => {
                 call.answer(stream);
                 const user: User = call.metadata.user;
+                const { isMuted, hasCamera } = call.metadata;
 
                 call.on('stream', userVideoStream => {
                     if(streamList[call.peer]) return;
                     streamList[call.peer] = call;
-                    setStreams(previous => [...previous, ...[{stream: userVideoStream, user, isMuted: false, hasCamera: true, disconnected: false, connecting: false}]]);
+                    setStreams(previous => [...previous, ...[{stream: userVideoStream, user, isMuted, hasCamera, disconnected: false, connecting: false}]]);
                 })
             })
 
@@ -125,7 +134,9 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                 setTimeout(() => {
                     const call = peer.call(user.id, stream, {
                         metadata: {
-                            user: selfUser.current
+                            user: selfUser.current,
+                            isMuted: isMutedRef.current,
+                            hasCamera: hasCameraRef.current
                         }
                     });
                     let userStream: null | MediaStream = null;
@@ -153,6 +164,13 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             })
         }).catch(console.error);
     };
+    useEffect(() => {
+        if(isConnected) return;
+        socket.off('user-disconnected');
+        socket.off('user-connected');
+        socket.off('toggle-mute');
+        socket.off('toggle-camera');
+    }, [isConnected])
 
     const animateUserDisconnection = useMemo(() => (userId: string) => {
         setStreams(previous => {
@@ -173,6 +191,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         track.enabled = !track.enabled;
         socket.emit('toggle-mute', ({ roomId, isMuted: !track.enabled, streamId: selfStream.id }))
         setIsMuted(!track.enabled);
+        isMutedRef.current = !track.enabled;
     }, [selfStream, roomId]);
     const toggleCamera = useMemo(() => () => {
         if(!selfStream) return;
@@ -180,6 +199,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         track.enabled = !track.enabled;
         socket.emit('toggle-camera', ({ roomId, hasCamera: track.enabled, streamId: selfStream.id }))
         setHasCamera(track.enabled);
+        hasCameraRef.current = track.enabled;
     }, [selfStream, roomId]);
     
     // Remove stream after disconnect animation
@@ -209,6 +229,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         socket,
         setConnected,
         joinRoom,
+        leaveRoom,
         isConnected
     }
     
