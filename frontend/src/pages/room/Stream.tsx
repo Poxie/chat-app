@@ -99,7 +99,7 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
             if(pinnedStream) {
                 const pinnedWidthOrigin: any = getAvailableWidth(containerWidth, pinnedStream, true);
                 const pinnedWidth = checkIfWidthExceeds(pinnedWidthOrigin, containerHeight, amountOfRows, true);
-                availableWidth = containerWidth - pinnedWidth - SPACING * 8;
+                availableWidth = containerWidth - pinnedWidth - SPACING * 4;
             } else {
                 availableWidth = containerWidth - (rowAmount * SPACING) - SPACING * amountOfRows;
             }
@@ -144,13 +144,13 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
         if(!isPinned && pinnedStream) {
             const pinnedWidthOrigin = getAvailableWidth(containerWidth, pinnedStream, true);
             let pinnedWidth = checkIfWidthExceeds(pinnedWidthOrigin, containerHeight, amountOfRows, true);
-            left = pinnedWidth + SPACING;
+            left = pinnedWidth;
 
             // Gives row items more spacing
             left += rowIndex * width;
 
             // Adding extra spacing between items
-            left += SPACING * 2 + SPACING * rowIndex;
+            left += SPACING + SPACING * rowIndex;
         }
         updateStreamStyle('left', `${left}px`);
     }, [streamAmount, orderId]);
