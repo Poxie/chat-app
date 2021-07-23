@@ -101,7 +101,7 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
                 const pinnedWidth = checkIfWidthExceeds(pinnedWidthOrigin, containerHeight, amountOfRows, true);
                 availableWidth = containerWidth - pinnedWidth - SPACING * 8;
             } else {
-                availableWidth = containerWidth - (rowAmount * SPACING) - SPACING * amountOfRows - SPACING * 2;
+                availableWidth = containerWidth - (rowAmount * SPACING) - SPACING * amountOfRows - SPACING;
             }
         }
         return availableWidth;
@@ -116,8 +116,9 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
         if(isPinned) {
             width = availableWidth;
         } else {
-            width = availableWidth / rowAmount
+            width = availableWidth / rowAmount;
         }
+        width += SPACING;
         width = checkIfWidthExceeds(width, containerHeight, amountOfRows, isPinned);
         variables.current = {...variables.current, ...{
             width
@@ -134,32 +135,37 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
         
         let left;
         if(orderId + 1 === streamAmount && rowIndex === 0) {
-            left = containerWidth / 2 - width / 2 - SPACING;
+            left = containerWidth / 2 - width / 2;
         } else {
             const emptySpace = availableWidth - (width * rowLength);
-            left = width * rowIndex + SPACING * rowIndex * 2 + emptySpace / 2 + SPACING;
+            left = width * rowIndex + SPACING * rowIndex + emptySpace / 2 + SPACING * 2;
         }
         if(isPinned) left = 0;
         if(!isPinned && pinnedStream) {
             const pinnedWidthOrigin = getAvailableWidth(containerWidth, pinnedStream, true);
             let pinnedWidth = checkIfWidthExceeds(pinnedWidthOrigin, containerHeight, amountOfRows, true);
-            left = pinnedWidth;
+            left = pinnedWidth + SPACING;
 
             // Gives row items more spacing
             left += rowIndex * width;
 
             // Adding extra spacing between items
-            left += SPACING * 2 + SPACING * rowIndex * 2;
+            left += SPACING * 2 + SPACING * rowIndex;
         }
         updateStreamStyle('left', `${left}px`);
     }, [streamAmount, orderId]);
 
     // Stream top styling
     const setTop = useMemo(() => () => {
-        const { currentRow, width, isPinned } = variables.current;
-        const top = isPinned ? 0 : currentRow * width * RATIO + SPACING * currentRow * 2;
+        if(!streamAmount) return;
+        const { currentRow, width, isPinned, pinnedStream, containerHeight, rowAmount } = variables.current;
+        let top = isPinned ? 0 : currentRow * width * RATIO + SPACING * currentRow;
+        if(!isPinned && pinnedStream) {
+            const emptySpace = containerHeight - ((Math.round((streamAmount - 1) / rowAmount)) * width * RATIO);
+            top += emptySpace / 2;
+        }
         updateStreamStyle('top', `${top}px`);
-    }, []);
+    }, [streamAmount]);
     
     const resizeStreams = () => {
         if(!streamAmount || !streamContainer.current || !container.current || orderId === undefined) return;
@@ -178,12 +184,16 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
             } else {
                 rowAmount = Math.floor((streamAmount - 1)/5) * 1 + 2;
             }
-            // amountOfRows = streamAmount - 1;
+            if(!isPinned) {
+                rowAmount = 2;
+                amountOfRows = Math.floor(streamAmount / 2);
+                console.log(amountOfRows);
+            }
         };
 
         // Updating all variables
         const containerWidth = streamContainer.current.offsetWidth;
-        const containerHeight = streamContainer.current.offsetHeight - ((SPACING * 2) * amountOfRows);
+        const containerHeight = streamContainer.current.offsetHeight - (SPACING * amountOfRows);
         let currentRow = amountOfRows === 1 ? 0 : Math.floor((orderId / rowAmount));
         let rowIndex = currentRow !== 0 ? orderId - (rowAmount * currentRow - 1) : orderId + 1;
         if(!isPinned && notPinnedIndex !== undefined) {
