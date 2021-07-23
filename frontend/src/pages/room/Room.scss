@@ -345,3 +345,50 @@
     margin-left: 10px;
     font-weight: 600;
 }
+.chat-notifications {
+    z-index: 15;
+    position: fixed;
+    bottom: 18px;
+    right: 100px;
+    min-width: 275px;
+    max-width: 350px;
+    pointer-events: none;
+}
+.notification {
+    background-color: var(--secondary-background);
+    padding: 12px 18px;
+    width: 275px;
+    border-radius: var(--border-radius);
+    pointer-events: all;
+    opacity: 0;
+    transition: opacity .2s, height .2s, margin-bottom .2s, padding .2s;
+    height: 0;
+    margin-bottom: 7px;
+    
+    .message-content {
+        overflow: hidden;
+        position: relative;
+        display: inline-block;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 14px;
+        width: 100%;
+    }
+
+    .message {
+        margin: 0;
+    }
+    .timestamp {
+        display: none;
+    }
+    &.animate-in {
+        opacity: 1;
+        height: 71px;
+    }
+    &.animate-out {
+        opacity: 0;
+        height: 0;
+        margin-bottom: 0;
+        padding: 0 18px;
+    }
+}
