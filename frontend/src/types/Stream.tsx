@@ -7,4 +7,5 @@ export interface Stream {
     hasCamera: boolean;
     disconnected: boolean;
     connecting: boolean;
+    isPinned: boolean;
 }

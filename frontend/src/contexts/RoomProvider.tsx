@@ -24,6 +24,7 @@ interface ContextType {
     joinRoom: () => void;
     leaveRoom: () => void;
     isConnected: boolean;
+    setPinned: (userId: string | null) => void;
 }
 // @ts-ignore
 const RoomContext = createContext<ContextType>(null);
@@ -102,7 +103,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                     if(streamList[call.peer]) return;
                     streamList[call.peer] = call;
 
-                    setStreams(previous => [...previous, ...[{stream: userVideoStream, user, isMuted, hasCamera, disconnected: false, connecting: false}]]);
+                    setStreams(previous => [...previous, ...[{stream: userVideoStream, user, isMuted, hasCamera, disconnected: false, connecting: false, isPinned: false}]]);
                 })
             })
 
@@ -149,7 +150,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                     call.on('stream', userVideoStream => {
                         if(callList[call.peer]) return;
                         userStream = userVideoStream;
-                        setStreams(previous => [...previous, ...[{stream: userVideoStream, user, isMuted, hasCamera, disconnected: false, connecting: true}]]);
+                        setStreams(previous => [...previous, ...[{stream: userVideoStream, user, isMuted, hasCamera, disconnected: false, connecting: true, isPinned: false}]]);
                         callList[call.peer] = call;
                     })
                     call.on('close', () => {
@@ -209,18 +210,26 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     }, [selfStream, roomId]);
     
     // Remove stream after disconnect animation
-    const removeStream = (userId: string) => {
+    const removeStream = useMemo(() => (userId: string) => {
         setStreams(previous => previous.filter(stream => stream.user.id !== userId));
-    };
+    }, []);
     // Remove connecting status
-    const setConnected = (userId: string) => {
+    const setConnected = useMemo(() => (userId: string) => {
         setStreams(previous => previous.map(stream => {
             if(stream.user.id === userId) {
                 stream.connecting = false;
             }
             return stream;
         }))
-    }
+    }, []);
+
+    // Pinning streams
+    const setPinned = useMemo(() => (userId: string | null) => {
+        setStreams(previous => previous.map(stream => {
+            stream.isPinned = stream.user.id === userId;
+            return stream;
+        }))
+    }, []);
 
 
     const value = {
@@ -236,7 +245,8 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         setConnected,
         joinRoom,
         leaveRoom,
-        isConnected
+        isConnected,
+        setPinned
     }
     
     return(

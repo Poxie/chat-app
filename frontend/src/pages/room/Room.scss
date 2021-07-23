@@ -173,6 +173,36 @@
         max-width: 0% !important;
         margin: -4px !important;
     }
+    &:hover {
+        .stream-options {
+            opacity: 1;
+        }
+    }
+}
+.stream-options {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 13;
+    background-color: rgba(0,0,0,.4);
+    padding: 8px 13px;
+    border-radius: 120px;
+    opacity: 0;
+    transition: opacity .2s;
+
+    &>div {
+        margin: 0 8px;
+    }
+
+    svg {
+        fill: var(--primary-text);
+        width: 20px;
+        margin-bottom: -4px;
+    }
+    .speaker-icon svg {
+        width: 25px;
+    }
 }
 .letter-icon {
     font-size: 9em;

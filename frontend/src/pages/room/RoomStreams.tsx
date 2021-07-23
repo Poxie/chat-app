@@ -7,32 +7,14 @@ export const RoomStreams = () => {
     let { streams } = useRoom();
     const ref = useRef<null | HTMLDivElement>(null);
 
-    useEffect(() => {
-        if(!ref.current) return;
-        // if(streams.length === 3 || streams.length === 4) {
-        //     ref.current.style.width = `1000px`;
-        //     document.documentElement.style.setProperty('--row-items', '2');
-        // }
-        // if(streams.length < 3) {
-        //     document.documentElement.style.setProperty('--row-items', '2');
-        //     ref.current.style.width = `100%`;
-        // } else if(streams.length >= 5) {
-        //     document.documentElement.style.setProperty('--row-items', '3');
-        //     ref.current.style.width = `unset`;
-        // }
-    }, [streams]);
-
-    // let newS: any = [];
-    // streams.forEach(stream => newS.push(stream));
-    // streams.forEach(stream => newS.push(stream));
-    // streams.forEach(stream => newS.push(stream));
-    // streams.forEach(stream => newS.push(stream));
-    // streams = [...streams, ...newS];
-
+    const pinnedStream = streams.filter(stream => stream.isPinned)[0];
+    const pinnedStreamIndex = streams.indexOf(pinnedStream);
+    const notPinnedStreams = streams.filter(stream => !stream.isPinned);
     return(
         <Flex className="streams" flexWrap={'wrap'} justifyContent={'center'}>
             <div className="room-streams" style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'center'}} ref={ref}>
                 {streams.map((stream, key) => {
+                    const notPinnedIndex = notPinnedStreams.indexOf(stream);
                     return(
                         <Stream 
                             stream={stream.stream}
@@ -44,6 +26,10 @@ export const RoomStreams = () => {
                             streamAmount={streams.length}
                             orderId={key}
                             container={ref}
+                            isPinned={stream.isPinned}
+                            pinnedStream={pinnedStream}
+                            pinnedStreamIsBefore={pinnedStreamIndex < key}
+                            notPinnedIndex={notPinnedIndex}
                             key={stream.stream.id}
                         />
                     )
