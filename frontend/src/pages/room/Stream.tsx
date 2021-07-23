@@ -9,6 +9,7 @@ import { useChat } from "../../contexts/ChatProvider";
 import { PinIcon } from "./PinIcon";
 import { StreamOptions } from "./StreamOptions";
 import { Stream as StreamType } from "../../types/Stream";
+import { DeafenedIcon } from "./DeafenedIcon";
 
 interface Props {
     stream: MediaStream;
@@ -25,6 +26,7 @@ interface Props {
     pinnedStream?: StreamType;
     pinnedStreamIsBefore?: boolean;
     notPinnedIndex?: number;
+    selfMuted?: boolean;
 }
 
 const chunkArray = (streamAmount: number, rowAmount: number) => {
@@ -41,8 +43,8 @@ const chunkArray = (streamAmount: number, rowAmount: number) => {
 const RATIO = 0.7492063492;
 const SPACING = 10;
 const NON_PINNED_WIDTH = 300;
-export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted, disconnected, connecting, orderId, container: streamContainer, isSelfStream=false, streamAmount, isPinned, pinnedStream, pinnedStreamIsBefore, notPinnedIndex }) => {
-    const { removeStream, setConnected, setPinned } = useRoom();
+export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted, disconnected, connecting, orderId, container: streamContainer, isSelfStream=false, streamAmount, isPinned, pinnedStream, pinnedStreamIsBefore, notPinnedIndex, selfMuted }) => {
+    const { removeStream, setConnected, setPinned, setSelfMute } = useRoom();
     const { open } = useChat();
     const container = useRef<HTMLDivElement | null>(null);
     const [isSpeaking, setIsSpeaking] = useState(false);
@@ -228,22 +230,31 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
         window.addEventListener('resize', resizeStreams);
         return () => window.removeEventListener('resize', resizeStreams);
     }, [streamAmount, isPinned, pinnedStream, pinnedStreamIsBefore]);
-    useEffect(resizeStreams, [streamAmount, orderId, pinnedStream, notPinnedIndex, isPinned]);
+    useEffect(resizeStreams, [streamAmount, orderId, pinnedStream, notPinnedIndex, isPinned, selfMuted]);
     useEffect(() => {
         setTimeout(resizeStreams, 400);
     }, [open]);
 
+    let topVisuals;
+    if(isMuted && !selfMuted) {
+        topVisuals = <IsMutedIcon />;
+    } else if(selfMuted) {
+        topVisuals = <DeafenedIcon />
+    }
+ 
     return(
-        <div data-order={orderId} className={`user${isSpeaking ? ' is-speaking' : ''}${disconnected ? ' disconnected' : ''}${connecting ? ' connecting' : ''}`} ref={container}>
+        <div data-order={orderId} className={`user${isSpeaking ? ' is-speaking' : ''}${disconnected ? ' disconnected' : ''}${connecting ? ' connecting' : ''}${selfMuted ? ' self-muted' : ''}`} ref={container}>
             {!isSelfStream && (
                 <>
                 <div className="user-top">
-                    {isMuted && <IsMutedIcon />}
+                    {topVisuals}
                 </div>
                 {isPinned !== undefined && (
                     <StreamOptions 
                         isPinned={isPinned}
                         setPinned={() => setPinned(isPinned ? null : user.id)}
+                        isSelfMuted={selfMuted}
+                        setSelfMuted={() => setSelfMute(user.id, !selfMuted)}
                     />
                 )}
                 </>
@@ -258,6 +269,7 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
                     setIsSpeaking={setIsSpeaking}
                     stream={stream}
                     isSelfStream={isSelfStream}
+                    selfMuted={selfMuted}
                 />
             </Flex>
             {!isSelfStream && (

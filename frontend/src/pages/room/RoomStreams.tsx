@@ -30,6 +30,7 @@ export const RoomStreams = () => {
                             pinnedStream={pinnedStream}
                             pinnedStreamIsBefore={pinnedStreamIndex < key}
                             notPinnedIndex={notPinnedIndex}
+                            selfMuted={stream.selfMuted}
                             key={stream.stream.id}
                         />
                     )

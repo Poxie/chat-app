@@ -25,6 +25,7 @@ interface ContextType {
     leaveRoom: () => void;
     isConnected: boolean;
     setPinned: (userId: string | null) => void;
+    setSelfMute: (userId: string, state: boolean) => void;
 }
 // @ts-ignore
 const RoomContext = createContext<ContextType>(null);
@@ -103,7 +104,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                     if(streamList[call.peer]) return;
                     streamList[call.peer] = call;
 
-                    setStreams(previous => [...previous, ...[{stream: userVideoStream, user, isMuted, hasCamera, disconnected: false, connecting: false, isPinned: false}]]);
+                    setStreams(previous => [...previous, ...[{stream: userVideoStream, user, isMuted, hasCamera, disconnected: false, connecting: false, isPinned: false, selfMuted: false}]]);
                 })
             })
 
@@ -150,7 +151,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                     call.on('stream', userVideoStream => {
                         if(callList[call.peer]) return;
                         userStream = userVideoStream;
-                        setStreams(previous => [...previous, ...[{stream: userVideoStream, user, isMuted, hasCamera, disconnected: false, connecting: true, isPinned: false}]]);
+                        setStreams(previous => [...previous, ...[{stream: userVideoStream, user, isMuted, hasCamera, disconnected: false, connecting: true, isPinned: false, selfMuted: false}]]);
                         callList[call.peer] = call;
                     })
                     call.on('close', () => {
@@ -208,6 +209,14 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         setHasCamera(track.enabled);
         hasCameraRef.current = track.enabled;
     }, [selfStream, roomId]);
+    const setSelfMute = useMemo(() => (userId: string, state: boolean) => {
+        setStreams(previous => previous.map(stream => {
+            if(stream.user.id === userId) {
+                stream.selfMuted = state;
+            }
+            return stream;
+        }))
+    }, []);
     
     // Remove stream after disconnect animation
     const removeStream = useMemo(() => (userId: string) => {
@@ -246,7 +255,8 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         joinRoom,
         leaveRoom,
         isConnected,
-        setPinned
+        setPinned,
+        setSelfMute
     }
     
     return(

@@ -5,12 +5,11 @@ interface Props {
     setIsSpeaking: (state: boolean) => void;
     stream: MediaStream;
     isSelfStream?: boolean;
+    selfMuted?: boolean;
 }
 
-export const StreamVideo: React.FC<Props> = memo(({ setIsSpeaking, stream, isSelfStream }) => {
+export const StreamVideo: React.FC<Props> = memo(({ setIsSpeaking, stream, isSelfStream, selfMuted }) => {
     const ref = useRef<null | HTMLVideoElement>(null);
-
-    console.log('re-rendered');
 
     useEffect(() => {
         if(!ref.current) return;
@@ -31,6 +30,6 @@ export const StreamVideo: React.FC<Props> = memo(({ setIsSpeaking, stream, isSel
     }, []);
 
     return(
-        <video ref={ref} muted={isSelfStream}></video>
+        <video ref={ref} muted={isSelfStream || selfMuted}></video>
     )
 });

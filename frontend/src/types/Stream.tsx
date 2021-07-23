@@ -8,4 +8,5 @@ export interface Stream {
     disconnected: boolean;
     connecting: boolean;
     isPinned: boolean;
+    selfMuted: boolean;
 }
