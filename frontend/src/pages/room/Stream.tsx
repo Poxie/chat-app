@@ -46,6 +46,7 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
     const { open } = useChat();
     const container = useRef<HTMLDivElement | null>(null);
     const [isSpeaking, setIsSpeaking] = useState(false);
+    const variables = useRef<any>({});
 
     useEffect(() => {
         if(disconnected === true) {
@@ -64,55 +65,105 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
         }
     }, [connecting]);
 
-    const checkIfWidthExceeds: any = (width: number, containerHeight: number, amountOfRows: number) => {
-        const condition = isPinned ? width * RATIO > containerHeight : width * RATIO * amountOfRows > containerHeight;
+    // Makes sure height doesn't exceed container
+    const checkIfWidthExceeds: any = (width: number, containerHeight: number, amountOfRows: number, isPinned?: boolean) => {
+        const condition = isPinned ? width * RATIO - SPACING * 2 > containerHeight : width * RATIO * amountOfRows > containerHeight;
         if(condition) {
-            return checkIfWidthExceeds(width - 1, containerHeight, amountOfRows);
+            return checkIfWidthExceeds(width - 1, containerHeight, amountOfRows, isPinned);
         }
         return width;
     }
-    const determineWidth = (availableWidth: number, rowAmount: number, amountOfRows: number, containerHeight: number, isPinned?: boolean) => {
-        let width;
-        if(isPinned) {
-            width = (availableWidth - NON_PINNED_WIDTH) - SPACING * 2;
-        } else {
-            width = availableWidth / rowAmount;
-        }
-        return checkIfWidthExceeds(width, containerHeight, amountOfRows);
-    }
-    const getRowItemLength = useMemo(() => (rowAmount: number, currentRow: number, streamAmount: number) => {
+
+    // Getting the length of a certain row
+    const getRowLength = useMemo(() => (rowAmount: number, currentRow: number, streamAmount: number) => {
         const rows = chunkArray(streamAmount, rowAmount);
         // @ts-ignore
         let itemLength = rows[currentRow]?.length;
-        return [itemLength, rows];
+        return itemLength;
     }, []);
-    const determineLeft = (width: number, containerWidth: number, rowIndex: number, orderId: number, rowAmount: number, currentRow: number, availableWidth: number) => {
-        if(!streamAmount) return;
-        let left;
+
+    // Simple function to update stream styles
+    const updateStreamStyle = useMemo(() => (property: any, value: any) => {
+        if(!container.current) return;
+        container.current.style[property] = value;
+    }, [container.current]);
+
+    // Getting the available stream container width
+    const getAvailableWidth = useMemo(() => (containerWidth: number, pinnedStream?: StreamType, isPinned?: boolean) => {
+        if(!streamAmount) return containerWidth;
+        const { containerHeight, amountOfRows, rowAmount } = variables.current;
+        let availableWidth;
         if(isPinned) {
-            const normalWidth = containerWidth - NON_PINNED_WIDTH;
-            return SPACING * 2;
-        } else if(pinnedStream && notPinnedIndex !== undefined) {
-            const row = Math.floor((notPinnedIndex / rowAmount) + .1);
-            currentRow = currentRow !== 0 ? notPinnedIndex - (rowAmount * currentRow - 1) : notPinnedIndex + 1;
-            const [ itemLength ] = getRowItemLength(rowAmount, row, streamAmount - 1);
-            left = itemLength === 1 ? containerWidth - (availableWidth / 2) - width / 2 : containerWidth - rowIndex * width;
-            left -= SPACING * rowIndex + SPACING * 2;
-            return left;
-            // return (containerWidth - (streamAmount * SPACING + SPACING * 6)) - width + SPACING * 4;
+            availableWidth = containerWidth - NON_PINNED_WIDTH;
+        } else {
+            if(pinnedStream) {
+                const pinnedWidthOrigin: any = getAvailableWidth(containerWidth, pinnedStream, true);
+                const pinnedWidth = checkIfWidthExceeds(pinnedWidthOrigin, containerHeight, amountOfRows, true);
+                availableWidth = containerWidth - pinnedWidth - SPACING * 8;
+            } else {
+                availableWidth = containerWidth - (rowAmount * SPACING) - SPACING * amountOfRows - SPACING * 2;
+            }
         }
-        // if(pinnedStream) return containerWidth - width - SPACING * 3;
-        if(orderId + 1 === streamAmount && rowIndex === 1) {
+        return availableWidth;
+    }, [streamAmount]);
+
+    // Stream width styling
+    const setWidth = useMemo(() => () => {
+        const { containerWidth, containerHeight, rowAmount, amountOfRows, isPinned, pinnedStream } = variables.current;
+        const availableWidth = getAvailableWidth(containerWidth, pinnedStream, isPinned);
+
+        let width;
+        if(isPinned) {
+            width = availableWidth;
+        } else {
+            width = availableWidth / rowAmount
+        }
+        width = checkIfWidthExceeds(width, containerHeight, amountOfRows, isPinned);
+        variables.current = {...variables.current, ...{
+            width
+        }}
+        updateStreamStyle('width', `${width}px`);
+    }, [variables]);
+
+    // Stream left styling
+    const setLeft = useMemo(() => () => {   
+        if(!streamAmount || orderId === undefined) return;
+        const { containerWidth, containerHeight, rowIndex, currentRow, rowAmount, width, isPinned, pinnedStream, amountOfRows } = variables.current;
+        const availableWidth = getAvailableWidth(containerWidth, pinnedStream, isPinned);
+        const rowLength = getRowLength(rowAmount, currentRow, streamAmount);
+        
+        let left;
+        if(orderId + 1 === streamAmount && rowIndex === 0) {
             left = containerWidth / 2 - width / 2 - SPACING;
         } else {
-            rowIndex--;
-            const [rowItemLength, rows] = getRowItemLength(rowAmount, currentRow, streamAmount);
-            left = (rowAmount * width) / (rowItemLength / (rowItemLength - 1)) - (rowIndex * width) - (SPACING * 2 * (rowIndex)) + ((containerWidth - width * rowAmount) / 2) + SPACING * (rowItemLength - 1) - SPACING;
+            const emptySpace = availableWidth - (width * rowLength);
+            left = width * rowIndex + SPACING * rowIndex * 2 + emptySpace / 2 + SPACING;
         }
-        return left;
-    }
+        if(isPinned) left = 0;
+        if(!isPinned && pinnedStream) {
+            const pinnedWidthOrigin = getAvailableWidth(containerWidth, pinnedStream, true);
+            let pinnedWidth = checkIfWidthExceeds(pinnedWidthOrigin, containerHeight, amountOfRows, true);
+            left = pinnedWidth;
+
+            // Gives row items more spacing
+            left += rowIndex * width;
+
+            // Adding extra spacing between items
+            left += SPACING * 2 + SPACING * rowIndex * 2;
+        }
+        updateStreamStyle('left', `${left}px`);
+    }, [streamAmount, orderId]);
+
+    // Stream top styling
+    const setTop = useMemo(() => () => {
+        const { currentRow, width, isPinned } = variables.current;
+        const top = isPinned ? 0 : currentRow * width * RATIO + SPACING * currentRow * 2;
+        updateStreamStyle('top', `${top}px`);
+    }, []);
+    
     const resizeStreams = () => {
         if(!streamAmount || !streamContainer.current || !container.current || orderId === undefined) return;
+        
         // Calculating the amount of streams per row
         let rowAmount;
         if(streamAmount / 2 === 1) {
@@ -130,17 +181,9 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
             // amountOfRows = streamAmount - 1;
         };
 
+        // Updating all variables
         const containerWidth = streamContainer.current.offsetWidth;
         const containerHeight = streamContainer.current.offsetHeight - ((SPACING * 2) * amountOfRows);
-        let availableWidth = containerWidth - (streamAmount * SPACING + SPACING * 6);
-        if(!isPinned && pinnedStream) availableWidth = availableWidth - determineWidth(availableWidth, 1, 1, containerHeight, true); 
-
-        // Styling stream
-        const style = container.current.style;
-
-        // Setting width of stream
-        const width = determineWidth(availableWidth, rowAmount, amountOfRows, containerHeight, isPinned);
-        style.width = `${width}px`;
         let currentRow = amountOfRows === 1 ? 0 : Math.floor((orderId / rowAmount));
         let rowIndex = currentRow !== 0 ? orderId - (rowAmount * currentRow - 1) : orderId + 1;
         if(!isPinned && notPinnedIndex !== undefined) {
@@ -148,22 +191,31 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
             rowIndex = currentRow !== 0 ? notPinnedIndex - (rowAmount * currentRow - 1) : notPinnedIndex + 1;
         }
 
-        // Setting position of element
-        const left = determineLeft(width, containerWidth, rowIndex, orderId, rowAmount, currentRow, availableWidth);
-        style.left = `${left}px`;
-        let topCurrentRow = amountOfRows === 1 ? 0 : Math.floor(orderId / rowAmount)
-        let top = isPinned ? 0 : width * RATIO * topCurrentRow + SPACING * topCurrentRow * 2;
-        if(!isPinned && pinnedStream && notPinnedIndex !== undefined) {
-            const row = Math.floor(notPinnedIndex / rowAmount);
-            top = row * width * RATIO + SPACING * row;
+        // Setting the updated variables
+        variables.current = {
+            ...variables.current,
+            ...{
+                rowAmount,
+                containerWidth,
+                containerHeight,
+                amountOfRows,
+                rowIndex: rowIndex - 1,
+                currentRow,
+                isPinned,
+                pinnedStream
+            }
         }
-        style.top = `${top}px`;
+
+        // Styling stream
+        setWidth();
+        setLeft();
+        setTop();
     }
     useEffect(() => {
         window.addEventListener('resize', resizeStreams);
         return () => window.removeEventListener('resize', resizeStreams);
     }, [streamAmount, isPinned, pinnedStream, pinnedStreamIsBefore]);
-    useEffect(resizeStreams, [streamAmount, orderId, pinnedStream, notPinnedIndex]);
+    useEffect(resizeStreams, [streamAmount, orderId, pinnedStream, notPinnedIndex, isPinned]);
     useEffect(() => {
         setTimeout(resizeStreams, 300);
     }, [open]);
