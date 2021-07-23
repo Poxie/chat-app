@@ -282,6 +282,10 @@
 .chat {
     height: 100%;
 }
+.message-notice {
+    color: var(--muted-text);
+    font-family: Arial, Helvetica, sans-serif;
+}
 .messages {
     height: 100%;
     max-height: 91%;
