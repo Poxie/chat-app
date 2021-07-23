@@ -66,7 +66,7 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
     }, []);
     const closeNotifications = useMemo(() => () => {
         setNotification([]);
-        setOpen(true);
+        handleSetOpen(true);
     }, []);
 
     const handleSetOpen = useMemo(() => (state: boolean) => {
