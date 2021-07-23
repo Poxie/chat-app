@@ -101,7 +101,7 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
                 const pinnedWidth = checkIfWidthExceeds(pinnedWidthOrigin, containerHeight, amountOfRows, true);
                 availableWidth = containerWidth - pinnedWidth - SPACING * 8;
             } else {
-                availableWidth = containerWidth - (rowAmount * SPACING) - SPACING * amountOfRows - SPACING;
+                availableWidth = containerWidth - (rowAmount * SPACING) - SPACING * amountOfRows;
             }
         }
         return availableWidth;
@@ -113,7 +113,7 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
         const availableWidth = getAvailableWidth(containerWidth, pinnedStream, isPinned);
 
         let width;
-        if(isPinned) {
+        if(isPinned || streamAmount === 1) {
             width = availableWidth;
         } else {
             width = availableWidth / rowAmount;
@@ -124,7 +124,7 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
             width
         }}
         updateStreamStyle('width', `${width}px`);
-    }, [variables]);
+    }, [variables, streamAmount]);
 
     // Stream left styling
     const setLeft = useMemo(() => () => {   
@@ -138,7 +138,7 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
             left = containerWidth / 2 - width / 2;
         } else {
             const emptySpace = availableWidth - (width * rowLength);
-            left = width * rowIndex + SPACING * rowIndex + emptySpace / 2 + SPACING * 2;
+            left = width * rowIndex + SPACING * rowIndex + emptySpace / 2 + SPACING;
         }
         if(isPinned) left = 0;
         if(!isPinned && pinnedStream) {
@@ -158,12 +158,15 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
     // Stream top styling
     const setTop = useMemo(() => () => {
         if(!streamAmount) return;
-        const { currentRow, width, isPinned, pinnedStream, containerHeight, rowAmount } = variables.current;
+        const { currentRow, width, isPinned, pinnedStream, containerHeight, rowAmount, amountOfRows } = variables.current;
         let top = isPinned ? 0 : currentRow * width * RATIO + SPACING * currentRow;
+        let emptySpace = containerHeight - width * RATIO * amountOfRows;
         if(!isPinned && pinnedStream) {
-            const emptySpace = containerHeight - ((Math.round((streamAmount - 1) / rowAmount)) * width * RATIO);
-            top += emptySpace / 2;
+            emptySpace = containerHeight - ((Math.round((streamAmount - 1) / rowAmount)) * width * RATIO);
+        } else if(isPinned) {
+            emptySpace = containerHeight - width * RATIO;
         }
+        top += emptySpace / 2;
         updateStreamStyle('top', `${top}px`);
     }, [streamAmount]);
     
@@ -227,7 +230,7 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
     }, [streamAmount, isPinned, pinnedStream, pinnedStreamIsBefore]);
     useEffect(resizeStreams, [streamAmount, orderId, pinnedStream, notPinnedIndex, isPinned]);
     useEffect(() => {
-        setTimeout(resizeStreams, 300);
+        setTimeout(resizeStreams, 400);
     }, [open]);
 
     return(
