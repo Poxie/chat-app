@@ -67,7 +67,7 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
 
     // Makes sure height doesn't exceed container
     const checkIfWidthExceeds: any = (width: number, containerHeight: number, amountOfRows: number, isPinned?: boolean) => {
-        const condition = isPinned ? width * RATIO - SPACING * 2 > containerHeight : width * RATIO * amountOfRows > containerHeight;
+        const condition = isPinned ? width * RATIO - SPACING > containerHeight : width * RATIO * amountOfRows > containerHeight;
         if(condition) {
             return checkIfWidthExceeds(width - 1, containerHeight, amountOfRows, isPinned);
         }
