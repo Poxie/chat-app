@@ -25,6 +25,11 @@ export const MovableStream: React.FC<Props> = ({ user, stream, hasCamera, isMute
         if(top < 50) return 'down';
         return 'up';
     }
+
+    const handlePositionChange = (top: number | 'unset', left: number) => {
+        if(top === 'unset') return;
+        setTop(top);
+    }
     
     return(
         <MovableElement
@@ -33,6 +38,7 @@ export const MovableStream: React.FC<Props> = ({ user, stream, hasCamera, isMute
             shouldSnap={true}
             height={161}
             className={'movable-stream'}
+            onChange={handlePositionChange}
         >
             <MinimizeIcon 
                 isMinimized={false} 
