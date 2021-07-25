@@ -244,11 +244,11 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
  
     return(
         <div data-order={orderId} className={`user${isSpeaking ? ' is-speaking' : ''}${disconnected ? ' disconnected' : ''}${connecting ? ' connecting' : ''}${selfMuted ? ' self-muted' : ''}`} ref={container}>
+            <div className="user-top">
+                {topVisuals}
+            </div>
             {!isSelfStream && (
                 <>
-                <div className="user-top">
-                    {topVisuals}
-                </div>
                 {isPinned !== undefined && (
                     <StreamOptions 
                         isPinned={isPinned}
@@ -272,11 +272,9 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
                     selfMuted={selfMuted}
                 />
             </Flex>
-            {!isSelfStream && (
-                <div className="username">
-                    {user.username}
-                </div>
-            )}
+            <div className="username">
+                {user.username}
+            </div>
         </div>
     )
 });

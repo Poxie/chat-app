@@ -2,8 +2,8 @@ import { memo, useEffect, useRef } from "react";
 import hark from 'hark';
 
 interface Props {
-    setIsSpeaking: (state: boolean) => void;
     stream: MediaStream;
+    setIsSpeaking?: (state: boolean) => void;
     isSelfStream?: boolean;
     selfMuted?: boolean;
 }
@@ -13,9 +13,9 @@ export const StreamVideo: React.FC<Props> = memo(({ setIsSpeaking, stream, isSel
 
     useEffect(() => {
         if(!ref.current || !stream.id) return;
-        console.log(stream);
         
         ref.current.srcObject = stream;
+        if(!setIsSpeaking) return;
         ref.current.addEventListener('loadedmetadata', () => {
             ref.current?.play();
             if(!ref.current) return;

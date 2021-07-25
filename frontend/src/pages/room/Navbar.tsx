@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Flex } from "../../components/Flex";
 import { useAuthentication } from "../../contexts/AuthenticationProvider";
 import { useRoom } from "../../contexts/RoomProvider";
+import { MinimizeIcon } from "./MinimizeIcon";
 import { Stream } from "./Stream";
 
 const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -22,7 +23,11 @@ const getReadableTime = () => {
     return strTime;
 }
 
-export const Navbar = () => {
+interface Props {
+    hasStreamPopup: boolean;
+    setHasStreamPopup: (state: boolean) => void;
+}
+export const Navbar: React.FC<Props> = ({ hasStreamPopup, setHasStreamPopup }) => {
     const { selfStream, roomId, hasCamera, isMuted } = useRoom();
     const { user } = useAuthentication();
     const [time, setTime] = useState(getReadableTime());
@@ -52,8 +57,8 @@ export const Navbar = () => {
                         {getReadableTime()}
                     </span>
                 </div>
-                <div className="self-video">
-                    {selfStream && (
+                {selfStream && !hasStreamPopup && (
+                    <div className="self-video">
                         <Stream 
                             hasCamera={hasCamera}
                             isMuted={isMuted}
@@ -61,8 +66,14 @@ export const Navbar = () => {
                             user={{username: user.username, id: JSON.stringify(Math.random())}}
                             isSelfStream={true}
                         />
-                    )}
-                </div>
+                        <MinimizeIcon 
+                            isMinimized={true}
+                            onClick={() => setHasStreamPopup(true)}
+                            tooltip={'Pop Out'}
+                            tooltipDirection={'down'}
+                        />
+                    </div>
+                )}
             </Flex>
         </Flex>
     )

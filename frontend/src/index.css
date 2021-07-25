@@ -55,14 +55,19 @@ code {
 [data-tooltip]::after {
   pointer-events: none;
 }
-[data-tooltip-direction="up"] {
+[data-tooltip] {
   position: relative;
 }
 [data-tooltip-direction="up"]::after {
+  top: -43px;
+}
+[data-tooltip-direction="down"]::after {
+  top: 53px;
+}
+[data-tooltip]::after {
   content: attr(data-tooltip);
   display: block;
   position: absolute;
-  top: -45px;
   left: 50%;
   transform: translate(-50%) scale(.7);
   background-color: var(--tooltip-background);
@@ -73,7 +78,7 @@ code {
   opacity: 0;
   transition: opacity .15s, transform .15s;
 }
-[data-tooltip-direction="up"]:hover::after {
+[data-tooltip]:hover::after {
   opacity: 1;
   transform: translate(-50%) scale(1);
 }
