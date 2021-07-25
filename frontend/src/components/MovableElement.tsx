@@ -8,9 +8,10 @@ interface Props {
     shouldSnap?: boolean;
     isContainedWithinWindow?: boolean;
     className?: string;
+    onChange?: (top: number | 'unset', left: number) => void;
     children: any;
 }
-export const MovableElement: React.FC<Props> = ({ spaceFromEdge, dontAllowMoveWithinTheseBorders, shouldSnap, isContainedWithinWindow=true, children, className, height: heightDefault }) => {
+export const MovableElement: React.FC<Props> = ({ spaceFromEdge, dontAllowMoveWithinTheseBorders, shouldSnap, isContainedWithinWindow=true, children, className, height: heightDefault, onChange }) => {
     const ref = useRef<null | HTMLDivElement>(null);
     const [left, setLeft] = useState(spaceFromEdge);
     const [top, setTop] = useState<number | 'unset'>('unset');
@@ -76,6 +77,10 @@ export const MovableElement: React.FC<Props> = ({ spaceFromEdge, dontAllowMoveWi
         setLeft(left);
         setTop(top);
     };
+
+    useEffect(() => {
+        if(onChange) return onChange(top, left);
+    }, [top, left]);
     
     className = className ? `movable-element ${className}` : 'movable-element';
     return(
