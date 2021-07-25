@@ -127,10 +127,13 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             })
 
             // Handling users muting themselves
-            socket.on('toggle-mute', ({ isMuted, userId }: any) => {
+            socket.on('toggle-mute', ({ isMuted, streamId, userId }: any) => {
                 setStreams(previous => {
                     previous.forEach(stream => {
-                        if(stream.user.id == userId) {
+                        if(stream.stream.id == streamId) {
+                            stream.isMuted = isMuted;
+                        }
+                        if(stream.user.id === userId) {
                             stream.isMuted = isMuted;
                         }
                     })
@@ -139,10 +142,13 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                 setForceUpdate(previous => previous + 1);
             })
             // Handling users enabling camera
-            socket.on('toggle-camera', ({ hasCamera, userId }: any) => {
+            socket.on('toggle-camera', ({ hasCamera, streamId, userId }: any) => {
                 setStreams(previous => {
                     previous.forEach(stream => {
-                        if(stream.user.id == userId) {
+                        if(stream.stream.addEventListener == streamId) {
+                            stream.hasCamera = hasCamera;
+                        }
+                        if(stream.user.id === userId) {
                             stream.hasCamera = hasCamera;
                         }
                     })
@@ -235,7 +241,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         if(!selfStream) return;
         const track = selfStream.getAudioTracks()[0];
         track.enabled = !track.enabled;
-        socket.emit('toggle-mute', ({ roomId, isMuted: !track.enabled, userId: selfUser.current.id }))
+        socket.emit('toggle-mute', ({ roomId, isMuted: !track.enabled, streamId: selfStream.id, userId: selfUser.current?.id }))
         setIsMuted(!track.enabled);
         isMutedRef.current = !track.enabled;
     }, [selfStream, roomId]);
@@ -243,7 +249,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         if(!selfStream) return;
         const track = selfStream.getVideoTracks()[0];
         track.enabled = !track.enabled;
-        socket.emit('toggle-camera', ({ roomId, hasCamera: track.enabled, userId: selfUser.current.id }))
+        socket.emit('toggle-camera', ({ roomId, hasCamera: track.enabled, streamId: selfStream.id, userId: selfUser.current?.id }))
         setHasCamera(track.enabled);
         hasCameraRef.current = track.enabled;
     }, [selfStream, roomId]);
