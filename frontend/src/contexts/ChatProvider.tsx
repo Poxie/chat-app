@@ -35,25 +35,27 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
             setMessages(previous => [...previous, ...[message]]);
             if(!isOpen.current) {
                 setUnread(previous => previous + 1);
-                setNotification(previous => [...[message], ...previous]);
+                setNotification(previous => [...previous, ...[message]]);
             }
         })
 
         return () => socket.off('send-message');
     }, []);
     useEffect(() => {
-        setNotification(previous => {
-            const newNotifications = previous.map((notif, key) => {
-                if(!notif.animateIn) {
-                    notif.animateIn = true
-                    setTimeout(() => {
-                        removeNotification(notif);
-                    }, 6000);
-                };
-                return notif;
+        setTimeout(() => {
+            setNotification(previous => {
+                const newNotifications = previous.map((notif, key) => {
+                    if(!notif.animateIn) {
+                        notif.animateIn = true
+                        setTimeout(() => {
+                            removeNotification(notif);
+                        }, 6000);
+                    };
+                    return notif;
+                })
+                return newNotifications
             })
-            return newNotifications
-        })
+        }, 100);
     }, [notifications.length]);
     const removeNotification = useMemo(() => (notification: ChatNotification) => {
         setNotification(previous => previous.map(notif => {

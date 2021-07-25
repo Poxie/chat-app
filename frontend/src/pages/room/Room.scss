@@ -367,14 +367,14 @@
 }
 .notification {
     background-color: var(--secondary-background);
-    padding: 12px 18px;
+    padding: 0 18px;
     width: 275px;
     border-radius: var(--border-radius);
     pointer-events: all;
-    opacity: 0;
+    // opacity: 0;
     transition: opacity .2s, height .2s, margin-bottom .2s, padding .2s;
     height: 0;
-    margin-bottom: 7px;
+    overflow: hidden;
     
     .message-content {
         overflow: hidden;
@@ -395,6 +395,8 @@
     &.animate-in {
         opacity: 1;
         height: 71px;
+        padding: 12px 18px;
+        margin-bottom: 7px;
     }
     &.animate-out {
         opacity: 0;
