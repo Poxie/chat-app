@@ -52,6 +52,9 @@ code {
   bottom: 15px;
 }
 
+[data-tooltip]::after {
+  pointer-events: none;
+}
 [data-tooltip-direction="up"] {
   position: relative;
 }
