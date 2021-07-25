@@ -31,6 +31,8 @@ export const MovableStream: React.FC<Props> = ({ user, stream, hasCamera, isMute
             spaceFromEdge={25}
             dontAllowMoveWithinTheseBorders={{top: 43, left: 43}}
             shouldSnap={true}
+            height={161}
+            className={'movable-stream'}
         >
             <MinimizeIcon 
                 isMinimized={false} 

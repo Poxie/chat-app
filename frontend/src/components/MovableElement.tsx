@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import './MovableElement.scss';
 
 interface Props {
     spaceFromEdge: number;
     dontAllowMoveWithinTheseBorders?: {left: number, top: number};
+    height: number;
     shouldSnap?: boolean;
     isContainedWithinWindow?: boolean;
+    className?: string;
     children: any;
 }
-export const MovableElement: React.FC<Props> = ({ spaceFromEdge, dontAllowMoveWithinTheseBorders, shouldSnap, isContainedWithinWindow=true, children }) => {
+export const MovableElement: React.FC<Props> = ({ spaceFromEdge, dontAllowMoveWithinTheseBorders, shouldSnap, isContainedWithinWindow=true, children, className, height: heightDefault }) => {
     const ref = useRef<null | HTMLDivElement>(null);
     const [left, setLeft] = useState(spaceFromEdge);
     const [top, setTop] = useState<number | 'unset'>('unset');
@@ -74,10 +77,11 @@ export const MovableElement: React.FC<Props> = ({ spaceFromEdge, dontAllowMoveWi
         setTop(top);
     };
     
+    className = className ? `movable-element ${className}` : 'movable-element';
     return(
         <div 
-            className="movable-stream" 
-            style={{left, top, bottom: spaceFromEdge}} 
+            className={className}
+            style={{left, top, bottom: spaceFromEdge, height: `${heightDefault}px`}} 
             onMouseDown={handleMouseDown}
             ref={ref}
         >

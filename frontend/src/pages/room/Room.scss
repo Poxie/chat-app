@@ -130,7 +130,7 @@
     transition: transform .5s, opacity .5s, max-width .4s, margin .4s, width .5s, top .5s, left .5s;
 
     &.is-speaking {
-        border: 4px solid var(--speaking-color);
+        border: 4px solid var(--speaking-color) !important;
     }
     &.self-muted {
         border-color: transparent !important;
@@ -437,6 +437,12 @@
     height: 163px;
     z-index: 15;
     cursor: move;
+    box-shadow: rgb(0 0 0 / 30%) 0px 1px 4px 0px;
+    border-radius: 12px;
+
+    .user {
+        border-color: var(--secondary-background);
+    }
 }
 .movable-stream>*:not(.minimize-icon) {
     user-select: none;
