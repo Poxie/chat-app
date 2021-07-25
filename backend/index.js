@@ -32,13 +32,13 @@ io.on('connection', socket => {
         socket.leave(roomId);
         isInRoom = false;
     })
-    socket.on('toggle-mute', ({ roomId, isMuted, streamId }) => {
+    socket.on('toggle-mute', ({ roomId, isMuted, userId }) => {
         console.log('received toggle mute')
-        socket.broadcast.to(roomId).emit('toggle-mute', ({ streamId, isMuted }));
+        socket.broadcast.to(roomId).emit('toggle-mute', ({ userId, isMuted }));
     })
-    socket.on('toggle-camera', ({ roomId, hasCamera, streamId }) => {
+    socket.on('toggle-camera', ({ roomId, hasCamera, userId }) => {
         console.log('received toggle camera')
-        socket.broadcast.to(roomId).emit('toggle-camera', ({ streamId, hasCamera }));
+        socket.broadcast.to(roomId).emit('toggle-camera', ({ userId, hasCamera }));
     })
     socket.on('send-message', ({ roomId, content, author }) => {
         console.log('received message');

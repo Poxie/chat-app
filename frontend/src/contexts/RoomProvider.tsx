@@ -127,10 +127,10 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             })
 
             // Handling users muting themselves
-            socket.on('toggle-mute', ({ isMuted, streamId }: any) => {
+            socket.on('toggle-mute', ({ isMuted, userId }: any) => {
                 setStreams(previous => {
                     previous.forEach(stream => {
-                        if(stream.stream.id == streamId) {
+                        if(stream.user.id == userId) {
                             stream.isMuted = isMuted;
                         }
                     })
@@ -139,10 +139,10 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                 setForceUpdate(previous => previous + 1);
             })
             // Handling users enabling camera
-            socket.on('toggle-camera', ({ hasCamera, streamId }: any) => {
+            socket.on('toggle-camera', ({ hasCamera, userId }: any) => {
                 setStreams(previous => {
                     previous.forEach(stream => {
-                        if(stream.stream.id == streamId) {
+                        if(stream.user.id == userId) {
                             stream.hasCamera = hasCamera;
                         }
                     })
@@ -184,7 +184,6 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                     // Making it possible to change device during meeting
                     const deviceChange = () => {
                         const { video, audio } = devicesRef.current;
-                        console.log(video, audio);
                         navigator.mediaDevices.getUserMedia({
                             video: {
                                 deviceId: video
@@ -193,12 +192,16 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                                 deviceId: audio
                             }
                         }).then(stream => {
+                            if(isMutedRef.current) stream.getAudioTracks()[0].enabled = false;
+                            if(!hasCameraRef.current) stream.getVideoTracks()[0].enabled = false;
                             call.peerConnection.getSenders()[0].replaceTrack(stream.getTracks()[0]);
+                            setSelfStream(stream);
                         })
                     }
                     changeDevice.current = deviceChange;
                 }, 1000);
             })
+
             // Handling users leaving
             socket.on('user-disconnected', (user: User) => {
                 console.log('User disconnected');
@@ -232,7 +235,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         if(!selfStream) return;
         const track = selfStream.getAudioTracks()[0];
         track.enabled = !track.enabled;
-        socket.emit('toggle-mute', ({ roomId, isMuted: !track.enabled, streamId: selfStream.id }))
+        socket.emit('toggle-mute', ({ roomId, isMuted: !track.enabled, userId: selfUser.current.id }))
         setIsMuted(!track.enabled);
         isMutedRef.current = !track.enabled;
     }, [selfStream, roomId]);
@@ -240,7 +243,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         if(!selfStream) return;
         const track = selfStream.getVideoTracks()[0];
         track.enabled = !track.enabled;
-        socket.emit('toggle-camera', ({ roomId, hasCamera: track.enabled, streamId: selfStream.id }))
+        socket.emit('toggle-camera', ({ roomId, hasCamera: track.enabled, userId: selfUser.current.id }))
         setHasCamera(track.enabled);
         hasCameraRef.current = track.enabled;
     }, [selfStream, roomId]);

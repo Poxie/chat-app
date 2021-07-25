@@ -12,7 +12,8 @@ export const StreamVideo: React.FC<Props> = memo(({ setIsSpeaking, stream, isSel
     const ref = useRef<null | HTMLVideoElement>(null);
 
     useEffect(() => {
-        if(!ref.current) return;
+        if(!ref.current || !stream.id) return;
+        console.log(stream);
         
         ref.current.srcObject = stream;
         ref.current.addEventListener('loadedmetadata', () => {
