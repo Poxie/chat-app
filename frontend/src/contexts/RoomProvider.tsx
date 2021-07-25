@@ -7,6 +7,7 @@ import { Stream } from "../types/Stream";
 import { useFeedback } from "./FeedbackProvider";
 import { Params } from "../types/Params";
 import { useAuthentication } from "./AuthenticationProvider";
+import { useDevice } from "./DeviceProvider";
 
 const socket: any = io('http://localhost:3001');
 
@@ -50,11 +51,24 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     const [forceUpdate, setForceUpdate] = useState(0);
     const [isConnected, setIsConnected] = useState(false);
     const { setFeedback } = useFeedback();
+    const { devices } = useDevice();
+    const devicesRef = useRef(devices);
+    const changeDevice = useRef<null | (() => void)>(null);
+
+    useEffect(() => {
+        devicesRef.current = devices;
+        if(!changeDevice.current) return;
+        changeDevice.current();
+    }, [devices]);
 
     useEffect(() => {
         navigator.mediaDevices.getUserMedia({
-            video: true,
-            audio: true
+            video: {
+                deviceId: devices['video']
+            },
+            audio: {
+                deviceId: devices['audio']
+            }
         }).then(stream => {
             setSelfStream(stream)
         });
@@ -86,11 +100,15 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
 
         // Asking user for webcam and mic
         navigator.mediaDevices.getUserMedia({
-            video: true,
-            audio: true
+            video: {
+                deviceId: devices['video']
+            },
+            audio: {
+                deviceId: devices['audio']
+            }
         }).then(stream => {
             setSelfStream(stream)
-
+            
             // Answer calls if received
             let streamList: any = {};
             peer.on('call', call => {
@@ -162,6 +180,23 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                     })
                     
                     calls[user.id] = call;
+                    
+                    // Making it possible to change device during meeting
+                    const deviceChange = () => {
+                        const { video, audio } = devicesRef.current;
+                        console.log(video, audio);
+                        navigator.mediaDevices.getUserMedia({
+                            video: {
+                                deviceId: video
+                            },
+                            audio: {
+                                deviceId: audio
+                            }
+                        }).then(stream => {
+                            call.peerConnection.getSenders()[0].replaceTrack(stream.getTracks()[0]);
+                        })
+                    }
+                    changeDevice.current = deviceChange;
                 }, 1000);
             })
             // Handling users leaving

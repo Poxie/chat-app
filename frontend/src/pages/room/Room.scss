@@ -234,6 +234,12 @@
     .right {
         position: absolute;
         right: 20px;
+
+        &>div:first-child {
+            width: 120px;
+            border-radius: 140px;
+            color: var(--primary-text);
+        }
     }
 }
 .control-btn {
@@ -395,5 +401,20 @@
         height: 0;
         margin-bottom: 0;
         padding: 0 18px;
+    }
+}
+
+.device-setting .header {
+    margin: 14px 0;
+    display: block;
+    font-size: 13px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 600;
+}
+.settings-button {
+    margin-top: 20px;
+
+    .button {
+        font-size: 15px;
     }
 }

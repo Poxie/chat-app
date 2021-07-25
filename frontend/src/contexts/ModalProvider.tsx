@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react"
+import { createContext, useContext, useMemo, useState } from "react"
 import { ModalContext as ModalContextType } from "../types/ModalContext";
 
 const ModalContext = createContext<ModalContextType>({setModal: () => {}});
@@ -13,6 +13,10 @@ interface Props {
 export const ModalProvider: React.FC<Props> = ({ children }) => {
     const [modal, setModal] = useState<any>(null);
 
+    const close = useMemo(() => () => {
+        setModal(null);
+    }, []);
+
     const value = {
         setModal
     }
@@ -22,7 +26,7 @@ export const ModalProvider: React.FC<Props> = ({ children }) => {
             {children}
             <div className="modal-container">
                 {modal && (
-                    <div className="back-drop" />
+                    <div className="back-drop" onClick={close} />
                 )}
                 {modal}
             </div>
