@@ -40,6 +40,7 @@ const chunkArray = (streamAmount: number, rowAmount: number) => {
         })
     );
 }
+const RATIO = 0.7492063492;
 const SPACING = 10;
 const NON_PINNED_WIDTH = 300;
 export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted, disconnected, connecting, orderId, container: streamContainer, isSelfStream=false, streamAmount, isPinned, pinnedStream, pinnedStreamIsBefore, notPinnedIndex, selfMuted }) => {
@@ -47,16 +48,7 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
     const { open } = useChat();
     const container = useRef<HTMLDivElement | null>(null);
     const [isSpeaking, setIsSpeaking] = useState(false);
-    const [ratio, setRatio] = useState(0.7492063492)
     const variables = useRef<any>({});
-
-    useEffect(() => {
-        setTimeout(() => {
-            if(container.current) {
-                const ratio = container.current.offsetHeight / container.current.offsetWidth;
-            }
-        }, 100)
-    }, []);
 
     useEffect(() => {
         if(disconnected === true) {
@@ -77,7 +69,7 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
 
     // Makes sure height doesn't exceed container
     const checkIfWidthExceeds: any = (width: number, containerHeight: number, amountOfRows: number, isPinned?: boolean) => {
-        const condition = isPinned ? width * ratio - SPACING > containerHeight : width * ratio * amountOfRows > containerHeight;
+        const condition = isPinned ? width * RATIO - SPACING > containerHeight : width * RATIO * amountOfRows > containerHeight;
         if(condition) {
             return checkIfWidthExceeds(width - 1, containerHeight, amountOfRows, isPinned);
         }
@@ -139,8 +131,8 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
     // Stream height styling
     const setHeight = useMemo(() => () => {
         const { width } = variables.current;
-        updateStreamStyle('height', `${width * ratio}px`);
-    }, [variables]);
+        updateStreamStyle('height', `${width * RATIO}px`);
+    }, []);
 
     // Stream left styling
     const setLeft = useMemo(() => () => {   
@@ -173,16 +165,14 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
 
     // Stream top styling
     const setTop = useMemo(() => () => {
-        if(!streamAmount || !container.current) return;
+        if(!streamAmount) return;
         const { currentRow, width, isPinned, pinnedStream, containerHeight, rowAmount, amountOfRows } = variables.current;
-        const { offsetHeight, offsetWidth } = container.current;
-        const ratio = offsetHeight / offsetWidth;
-        let top = isPinned ? 0 : currentRow * width * ratio + SPACING * currentRow;
-        let emptySpace = containerHeight - width * ratio * amountOfRows;
+        let top = isPinned ? 0 : currentRow * width * RATIO + SPACING * currentRow;
+        let emptySpace = containerHeight - width * RATIO * amountOfRows;
         if(!isPinned && pinnedStream) {
-            emptySpace = containerHeight - ((Math.round((streamAmount - 1) / rowAmount)) * width * ratio);
+            emptySpace = containerHeight - ((Math.round((streamAmount - 1) / rowAmount)) * width * RATIO);
         } else if(isPinned) {
-            emptySpace = containerHeight - width * ratio;
+            emptySpace = containerHeight - width * RATIO;
         }
         top += emptySpace / 2;
         updateStreamStyle('top', `${top}px`);
@@ -287,6 +277,13 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
                     stream={stream}
                     isSelfStream={isSelfStream}
                     selfMuted={selfMuted}
+                />
+                <StreamVideo 
+                    setIsSpeaking={setIsSpeaking}
+                    stream={stream}
+                    isSelfStream={isSelfStream}
+                    selfMuted={selfMuted}
+                    isBackground={true}
                 />
             </Flex>
             <div className="username">

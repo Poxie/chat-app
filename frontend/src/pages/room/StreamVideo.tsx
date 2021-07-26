@@ -6,9 +6,10 @@ interface Props {
     setIsSpeaking?: (state: boolean) => void;
     isSelfStream?: boolean;
     selfMuted?: boolean;
+    isBackground?: boolean;
 }
 
-export const StreamVideo: React.FC<Props> = memo(({ setIsSpeaking, stream, isSelfStream, selfMuted }) => {
+export const StreamVideo: React.FC<Props> = memo(({ setIsSpeaking, stream, isSelfStream, selfMuted, isBackground }) => {
     const ref = useRef<null | HTMLVideoElement>(null);
 
     useEffect(() => {
@@ -19,7 +20,12 @@ export const StreamVideo: React.FC<Props> = memo(({ setIsSpeaking, stream, isSel
         ref.current.addEventListener('loadedmetadata', () => {
             ref.current?.play();
             if(!ref.current) return;
-            const speechEvents = hark(stream);
+            let speechEvents
+            try {
+                speechEvents = hark(stream);
+            } catch(e) {
+                return;
+            };
 
             speechEvents.on('speaking', () => {
                 setIsSpeaking(true);
@@ -31,6 +37,6 @@ export const StreamVideo: React.FC<Props> = memo(({ setIsSpeaking, stream, isSel
     }, []);
 
     return(
-        <video ref={ref} muted={isSelfStream || selfMuted}></video>
+        <video ref={ref} className={isBackground ? 'background-video' : ''} muted={isSelfStream || selfMuted}></video>
     )
 });
