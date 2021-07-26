@@ -27,6 +27,8 @@ interface ContextType {
     isConnected: boolean;
     setPinned: (userId: string | null) => void;
     setSelfMute: (userId: string, state: boolean) => void;
+    present: (state: MediaStream | null) => void;
+    presentation: MediaStream | null;
 }
 // @ts-ignore
 const RoomContext = createContext<ContextType>(null);
@@ -42,6 +44,8 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     const { roomId } = useParams<Params>();
     const { user } = useAuthentication();
     const [selfStream, setSelfStream] = useState<MediaStream | null>(null);
+    const [presentation, setPresentation] = useState<MediaStream | null>(null);
+    const presentationPeer = useRef<any>(null);
     const selfUser = useRef<any>(null);
     const [streams, setStreams] = useState<Stream[]>([]);
     const [isMuted, setIsMuted] = useState(false);
@@ -89,7 +93,6 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             port: 3002
         })
         peer.on('open', id => {
-            console.log(id);
             selfUser.current = {username: user?.username, id};
             socket.emit('join-room', {roomId, isMuted: isMutedRef.current, hasCamera: hasCameraRef.current, user: {username: selfUser.current.username, id}})
         })
@@ -284,6 +287,43 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         }))
     }, []);
 
+    const present = useMemo(() => (state: MediaStream | null) => {
+        if(!state) {
+            // Ignoring as its just not defined in typescript notation
+            // @ts-ignore
+            navigator.mediaDevices.getDisplayMedia({video: true, audio: true})
+                .then((stream: MediaStream) => {
+                    const peer = new Peer(undefined, {
+                        host: '/',
+                        port: 3002
+                    })
+                    let shareSocket: any;
+                    let streamUser: any;
+                    peer.on('open', id => {
+                        shareSocket = io('http://localhost:3001');
+                        streamUser = {...selfUser.current, ...{id}};
+                        shareSocket.emit('join-room', ({ user: streamUser, roomId, isMuted: false, hasCamera: true }));
+                        presentationPeer.current = peer;
+                        setPresentation(stream);
+                    })
+                    peer.on('disconnected', () => {
+                        console.log('closing');
+                        shareSocket.emit('leave-room', ({ roomId, user: streamUser }));
+                    })
+                    peer.on('call', call => {
+                        call.answer(stream);
+                    })
+                })
+        } else {
+            if(!presentationPeer.current) return;
+            presentationPeer.current.disconnect();
+            setPresentation(previous => {
+                previous?.getTracks().forEach(track => track.stop());
+                return null;
+            });
+        }
+    }, []);
+
 
     const value = {
         roomId,
@@ -300,7 +340,9 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         leaveRoom,
         isConnected,
         setPinned,
-        setSelfMute
+        setSelfMute,
+        present,
+        presentation
     }
     
     return(
