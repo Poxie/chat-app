@@ -1,6 +1,7 @@
 :root {
   --primary-background: #0e1015;
   --secondary-background: #1c212c;
+  --secondary-background-hover: #171c25;
   --input-background: #262d3b;
   --primary-color: #005cda;
   --primary-light: #fff;
@@ -8,6 +9,7 @@
   --muted-text: #72767d;
   --primary-text-with-light: #0e1015;
   --active-color: #ed4245;
+  --active-color-hover: #d83c3e;
   --navbar-height: 65px;
   --controls-height: 50px;
   --speaking-color: #008dc4;

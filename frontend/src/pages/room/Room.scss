@@ -119,10 +119,6 @@
     }
 }
 .user {
-    // flex: 1 calc((100% / var(--row-items) - 50px));
-    // max-width: 55%;
-    // width: calc((100% / var(--row-items) - 50px));
-    // flex-grow: 1;
     position: absolute;
     border-radius: 12px;
     overflow: hidden;
@@ -264,8 +260,15 @@
         width: 30px;
     }
 
+    &:hover {
+        background-color: var(--secondary-background-hover);
+    }
     &.active-btn {
         background-color: var(--active-color);
+
+        &:hover {
+            background-color: var(--active-color-hover);
+        }
     }
 }
 
@@ -432,13 +435,8 @@
 }
 
 .movable-stream {
-    position: fixed;
-    width: 220px;
-    height: 163px;
     z-index: 15;
-    cursor: move;
-    box-shadow: rgb(0 0 0 / 30%) 0px 1px 4px 0px;
-    border-radius: 12px;
+    height: 163px;
 
     .user {
         border-color: var(--secondary-background);
