@@ -6,11 +6,12 @@ import { CameraButton } from "./CameraButton";
 import { ControlButton } from "./ControlButton";
 import { IsMutedIcon } from "./IsMutedIcon";
 import { MicButton } from "./MicButton";
+import { PresentIcon } from "./PresentIcon";
 import { SettingsModal } from "./SettingsModal";
 import { UnreadMarker } from "./UnreadMarker";
 
 export const Controls = () => {
-    const { toggleMute, toggleCamera, isMuted, hasCamera, leaveRoom } = useRoom();
+    const { toggleMute, toggleCamera, isMuted, hasCamera, leaveRoom, present, presentation } = useRoom();
     const { setOpen, open, unread } = useChat();
     const { setModal } = useModal();
 
@@ -25,6 +26,13 @@ export const Controls = () => {
                     hasCamera={hasCamera}
                     toggleCamera={toggleCamera}
                 />
+                <ControlButton 
+                    tooltip={!presentation ? 'Present to Everyone' : 'Stop Presentation'}
+                    active={presentation !== null}
+                    onClick={() => present(presentation)}
+                >
+                    <PresentIcon />
+                </ControlButton>
                 <ControlButton 
                     active={true}
                     onClick={leaveRoom}
