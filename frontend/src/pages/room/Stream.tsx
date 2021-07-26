@@ -27,6 +27,7 @@ interface Props {
     pinnedStreamIsBefore?: boolean;
     notPinnedIndex?: number;
     selfMuted?: boolean;
+    isPresentation?: boolean;
 }
 
 const chunkArray = (streamAmount: number, rowAmount: number) => {
@@ -43,7 +44,7 @@ const chunkArray = (streamAmount: number, rowAmount: number) => {
 const RATIO = 0.7492063492;
 const SPACING = 10;
 const NON_PINNED_WIDTH = 300;
-export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted, disconnected, connecting, orderId, container: streamContainer, isSelfStream=false, streamAmount, isPinned, pinnedStream, pinnedStreamIsBefore, notPinnedIndex, selfMuted }) => {
+export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted, disconnected, connecting, orderId, container: streamContainer, isSelfStream=false, streamAmount, isPinned, pinnedStream, pinnedStreamIsBefore, notPinnedIndex, selfMuted, isPresentation }) => {
     const { removeStream, setConnected, setPinned, setSelfMute } = useRoom();
     const { open } = useChat();
     const container = useRef<HTMLDivElement | null>(null);
@@ -278,13 +279,15 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
                     isSelfStream={isSelfStream}
                     selfMuted={selfMuted}
                 />
-                <StreamVideo 
-                    setIsSpeaking={setIsSpeaking}
-                    stream={stream}
-                    isSelfStream={isSelfStream}
-                    selfMuted={selfMuted}
-                    isBackground={true}
-                />
+                {isPresentation && (
+                    <StreamVideo 
+                        setIsSpeaking={setIsSpeaking}
+                        stream={stream}
+                        isSelfStream={isSelfStream}
+                        selfMuted={selfMuted}
+                        isBackground={true}
+                    />
+                )}
             </Flex>
             <div className="username">
                 {user.username}

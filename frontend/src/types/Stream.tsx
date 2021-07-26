@@ -9,4 +9,5 @@ export interface Stream {
     connecting: boolean;
     isPinned: boolean;
     selfMuted: boolean;
+    isPresentation?: boolean;
 }
