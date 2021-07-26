@@ -46,6 +46,7 @@ code {
   border-radius: 5px;
   color: var(--primary-text);
   transition: bottom .5s;
+  z-index: 14141414;
 }
 .feedback-tip.animate-out {
   bottom: -56px;

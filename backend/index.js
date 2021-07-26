@@ -13,22 +13,22 @@ const io = require('socket.io')(server, {
 const rooms = {};
 io.on('connection', socket => {
     let isInRoom = false;
-    socket.on('join-room', ({ roomId, user, isMuted, hasCamera }) => {
+    socket.on('join-room', ({ roomId, user, isMuted, hasCamera, isPresentation }) => {
         socket.join(roomId);
         isInRoom = true;
-        socket.broadcast.to(roomId).emit('user-connected', {user, isMuted, hasCamera});
+        socket.broadcast.to(roomId).emit('user-connected', {user, isMuted, hasCamera, isPresentation});
         if(!rooms[roomId]) rooms[roomId] = {members: 0};
         if(rooms[roomId]) rooms[roomId].members++;
 
         socket.on('disconnect', () => {
             console.log(socket.rooms);
             if(rooms[roomId] && isInRoom) rooms[roomId].members--;
-            socket.broadcast.to(roomId).emit('user-disconnected', user);
+            socket.broadcast.to(roomId).emit('user-disconnected', ({ user, isPresentation }));
         })
     })
-    socket.on('leave-room', ({ roomId, user }) => {
+    socket.on('leave-room', ({ roomId, user, isPresentation }) => {
         if(rooms[roomId]) rooms[roomId].members--;
-        socket.broadcast.to(roomId).emit('user-disconnected', user);
+        socket.broadcast.to(roomId).emit('user-disconnected', ({ user, isPresentation }));
         socket.leave(roomId);
         isInRoom = false;
     })

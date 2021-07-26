@@ -290,7 +290,7 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
                 )}
             </Flex>
             <div className="username">
-                {user.username}
+                {user?.username}
             </div>
         </div>
     )
