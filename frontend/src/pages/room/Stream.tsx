@@ -10,6 +10,7 @@ import { PinIcon } from "./PinIcon";
 import { StreamOptions } from "./StreamOptions";
 import { Stream as StreamType } from "../../types/Stream";
 import { DeafenedIcon } from "./DeafenedIcon";
+import { useSidebar } from "../../contexts/SidebarProvider";
 
 interface Props {
     stream: MediaStream;
@@ -46,7 +47,7 @@ const SPACING = 10;
 const NON_PINNED_WIDTH = 300;
 export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted, disconnected, connecting, orderId, container: streamContainer, isSelfStream=false, streamAmount, isPinned, pinnedStream, pinnedStreamIsBefore, notPinnedIndex, selfMuted, isPresentation }) => {
     const { removeStream, setConnected, setPinned, setSelfMute } = useRoom();
-    const { open } = useChat();
+    const { open } = useSidebar();
     const container = useRef<HTMLDivElement | null>(null);
     const [isSpeaking, setIsSpeaking] = useState(false);
     const variables = useRef<any>({});

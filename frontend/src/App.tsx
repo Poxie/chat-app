@@ -5,6 +5,7 @@ import { DeviceProvider } from './contexts/DeviceProvider';
 import { FeedbackProvider } from './contexts/FeedbackProvider';
 import { ModalProvider } from './contexts/ModalProvider';
 import { RoomProvider } from './contexts/RoomProvider';
+import { SidebarProvider } from './contexts/SidebarProvider';
 import { Room } from './pages/room/Room';
 
 function App() {
@@ -17,9 +18,11 @@ function App() {
               <AuthenticationProvider>
                 <FeedbackProvider>
                   <RoomProvider>
-                    <ChatProvider>
-                      <Room />
-                    </ChatProvider>
+                    <SidebarProvider>
+                      <ChatProvider>
+                        <Room />
+                      </ChatProvider>
+                    </SidebarProvider>
                   </RoomProvider>
                 </FeedbackProvider>
               </AuthenticationProvider>
