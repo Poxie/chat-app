@@ -279,15 +279,6 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
                     isSelfStream={isSelfStream}
                     selfMuted={selfMuted}
                 />
-                {isPresentation && (
-                    <StreamVideo 
-                        setIsSpeaking={setIsSpeaking}
-                        stream={stream}
-                        isSelfStream={isSelfStream}
-                        selfMuted={selfMuted}
-                        isBackground={true}
-                    />
-                )}
             </Flex>
             <div className="username">
                 {user?.username}

@@ -333,6 +333,15 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             const shareSocket = io('http://localhost:3001');
             const { peer, stream, user } = await createMemberConnection(shareSocket, selfUser.current, false, true, 'getDisplayMedia', true);
 
+            shareSocket.on('user-connected', ({ user: connectedUser }) => {
+                peer.call(connectedUser.id, stream, {
+                    metadata: {
+                        user,
+                        isMuted: false,
+                        hasCamera: true
+                    }
+                });
+            });
             peer.on('open', id => {
                 presentationPeer.current = peer;
                 setPresentation(stream);
@@ -343,6 +352,8 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             peer.on('disconnected', () => {
                 shareSocket.close();
             })
+
+            // Checking for stream end (without click of stream button)
             stream.getTracks()[0].addEventListener('ended', () => {
                 presentationPeer.current.disconnect();
                 setPresentation(previous => {
