@@ -124,6 +124,7 @@
     overflow: hidden;
     border: 4px solid transparent;
     transition: transform .5s, opacity .5s, max-width .4s, margin .4s, width .5s, top .5s, left .5s, height .5s;
+    background-color: var(--secondary-background);
 
     &.is-speaking {
         border: 4px solid var(--speaking-color) !important;
@@ -167,7 +168,6 @@
         left: 50%;
         transform: translate(-50%);
         z-index: -1;
-        filter: blur(8px);
         opacity: .6;
     }
     video {
