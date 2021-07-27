@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { AttachmentProvider } from './contexts/AttachmentProvider';
 import { AuthenticationProvider } from './contexts/AuthenticationProvider';
 import { ChatProvider } from './contexts/ChatProvider';
 import { DeviceProvider } from './contexts/DeviceProvider';
@@ -17,13 +18,15 @@ function App() {
             <ModalProvider>
               <AuthenticationProvider>
                 <FeedbackProvider>
-                  <RoomProvider>
-                    <SidebarProvider>
-                      <ChatProvider>
-                        <Room />
-                      </ChatProvider>
-                    </SidebarProvider>
-                  </RoomProvider>
+                  <AttachmentProvider>
+                    <RoomProvider>
+                      <SidebarProvider>
+                          <ChatProvider>
+                            <Room />
+                          </ChatProvider>
+                      </SidebarProvider>
+                    </RoomProvider>
+                  </AttachmentProvider>
                 </FeedbackProvider>
               </AuthenticationProvider>
             </ModalProvider>

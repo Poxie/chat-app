@@ -14,8 +14,13 @@ interface Props {
 export const SidebarProvider: React.FC<Props> = ({ children }) => {
     const [sidebar, setSidebar] = useState<any>({type: null, open: false});
 
-    const toggleSidebar = (state: boolean, type: 'chat' | null) => {
-        setSidebar({type, open: state});
+    const toggleSidebar = (state: boolean, type: 'chat' | 'attachments' | null) => {
+        setSidebar((previous: any) => {
+            if(previous.open && type !== previous.type) {
+                return {type, open: true};
+            }
+            return {type, open: state};
+        });
     }
 
     const value = {

@@ -16,7 +16,7 @@ export const Messages: React.FC<Props> = ({ messages }) => {
     return(
         <div className="messages" ref={ref}>
             <div className="message-container" ref={container}>
-                <span className="message-notice">
+                <span className="notice">
                     Messages are not saved. If you leave the meeting, the messages will disappear.
                 </span>
                 {messages.map((message, key) => {

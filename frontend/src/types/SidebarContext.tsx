@@ -1,5 +1,5 @@
 export interface SidebarContext {
     open: boolean;
-    type: 'chat' | null;
-    toggleSidebar: (state: boolean, type: 'chat' | null) => void;
+    type: 'chat' | 'attachments' | null;
+    toggleSidebar: (state: boolean, type: 'chat' | 'attachments' | null) => void;
 }

@@ -40,6 +40,14 @@ io.on('connection', socket => {
         console.log('received toggle camera')
         socket.broadcast.to(roomId).emit('toggle-camera', ({ streamId, hasCamera, userId }));
     })
+    socket.on('record-start', ({ roomId, user, }) => {
+        console.log('record start received');
+        socket.broadcast.to(roomId).emit('record-start', ({ user }));
+    })
+    socket.on('record-stop', ({ roomId, user, blob }) => {
+        console.log('record stop received');
+        socket.broadcast.to(roomId).emit('record-stop', ({ user, blob }));
+    })
     socket.on('send-message', ({ roomId, content, author }) => {
         console.log('received message');
         io.in(roomId).emit('send-message', ({ content, author, date: Date.now() }));

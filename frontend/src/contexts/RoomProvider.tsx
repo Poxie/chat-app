@@ -13,6 +13,7 @@ import { ContextUser } from "../types/AuthenticationContext";
 import { RequestMediaType } from "../types/RequestMediaType";
 import { useModal } from "./ModalProvider";
 import { RecordedVideoModal } from "../pages/room/RecordedVideoModal";
+import { useAttachments } from "./AttachmentProvider";
 
 const socket = io('http://localhost:3001');
 
@@ -46,7 +47,7 @@ export const useRoom = () => {
     return useContext(RoomContext);
 }
 
-const generateId = () => {
+export const generateId = () => {
     let id = '';
     const opts = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     for(let i = 0; i < 50; i++) {
@@ -79,6 +80,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     const [isRecording, setIsRecording] = useState<null | typeof MediaRecorder>(null);
     const [isCurrentlyRecording, setIsCurrentlyRecording] = useState<false | User>(false);
     const recordingChunks = useRef<any>([]);
+    const { addAttachment } = useAttachments();
 
     useEffect(() => {
         devicesRef.current = devices;
@@ -213,9 +215,10 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         socket.on('record-start', ({ user }) => {
             setIsCurrentlyRecording(user);
         })
-        socket.on('record-stop', ({ user }) => {
+        socket.on('record-stop', ({ user, blob }) => {
             setIsCurrentlyRecording(false);
             setFeedback(`${user.username} stopped recording`);
+            addAttachment('video', blob, true);
         })
 
         // Handling users joining
@@ -444,14 +447,17 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             if(!isRecording) return;
             isRecording.recorder.stop();
 
-            // Notifying participants of record event
-            socket.emit('record-stop', ({ user: selfUser.current, roomId }));
-
             setTimeout(() => {
                 var blob = new Blob(recordingChunks.current, {
                     type: "video/webm"
                 });
                 var url = URL.createObjectURL(blob);
+
+                // Notifying participants of record event
+                socket.emit('record-stop', ({ user: selfUser.current, roomId, blob: url }));
+
+                // Adding to attachment context
+                addAttachment('video', url, true);
 
                 setModal(<RecordedVideoModal video={url} />)
                 setIsRecording((previous: any) => {
