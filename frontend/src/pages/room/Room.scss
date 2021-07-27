@@ -530,7 +530,7 @@
     .recording-countdown {
         height: 28px;
         border-radius: 4px;
-        background-color: red;
+        background-color: var(--active-color);
         font-size: 15px;
         width: 190px;
     }
@@ -548,8 +548,8 @@
     animation: scale-recording-up forwards .6s;
     background-color: rgba(0,0,0,.5);
     color: #fff;
-    width: 120px;
-    height: 120px;
+    width: 140px;
+    height: 140px;
     padding: 5px 10px;
     border-radius: 50%;
     transition: height .4s, width .4s, border-radius .4s, background-color .4s, font-size .4s;
