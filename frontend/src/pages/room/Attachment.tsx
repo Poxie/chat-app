@@ -19,7 +19,7 @@ export const Attachment = ({ type, source, isDownloadable, name }: AttachmentTyp
                 {name}
             </span>
             <video controls src={typeof source === 'string' ? source : ''}></video>
-            <a href={typeof source === 'string' ? source : ''}>
+            <a href={typeof source === 'string' ? source : ''} target="_blank" download={name}>
                 <Button>
                     Download
                 </Button>
