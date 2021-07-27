@@ -11,9 +11,12 @@ import { useDevice } from "./DeviceProvider";
 import { DefaultEventsMap } from "socket.io-client/build/typed-events";
 import { ContextUser } from "../types/AuthenticationContext";
 import { RequestMediaType } from "../types/RequestMediaType";
+import { useModal } from "./ModalProvider";
+import { RecordedVideoModal } from "../pages/room/RecordedVideoModal";
 
 const socket = io('http://localhost:3001');
 
+declare var MediaRecorder: any;
 interface ContextType {
     roomId: string | undefined;
     selfStream: MediaStream | null;
@@ -32,6 +35,8 @@ interface ContextType {
     setSelfMute: (userId: string, state: boolean) => void;
     present: (state: MediaStream | null) => void;
     presentation: MediaStream | null;
+    record: (state: boolean) => void;
+    isRecording: null | typeof MediaRecorder;
 }
 // @ts-ignore
 const RoomContext = createContext<ContextType>(null);
@@ -54,6 +59,7 @@ interface Props {
 export const RoomProvider: React.FC<Props> = ({ children }) => {
     const { roomId } = useParams<Params>();
     const { user } = useAuthentication();
+    const { setModal } = useModal();
     const [selfStream, setSelfStream] = useState<MediaStream | null>(null);
     const [presentation, setPresentation] = useState<MediaStream | null>(null);
     const presentationPeer = useRef<any>(null);
@@ -69,6 +75,8 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     const { devices } = useDevice();
     const devicesRef = useRef(devices);
     const changeDevice = useRef<null | (() => void)>(null);
+    const [isRecording, setIsRecording] = useState<null | typeof MediaRecorder>(null);
+    const recordingChunks = useRef<any>([]);
 
     useEffect(() => {
         devicesRef.current = devices;
@@ -308,7 +316,17 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     
     // Remove stream after disconnect animation
     const removeStream = useMemo(() => (userId: string) => {
-        setStreams(previous => previous.filter(stream => stream.user.id !== userId));
+        setStreams(previous => {
+            previous.filter(stream => {
+                if(stream.user.id !== userId) {
+                    return stream;
+                } else {
+                    stream.stream.getAudioTracks().forEach(track => track.stop());
+                    stream.stream.getVideoTracks().forEach(track => track.stop());
+                }
+            })
+            return previous;
+        });
     }, []);
     // Remove connecting status
     const setConnected = useMemo(() => (userId: string) => {
@@ -328,6 +346,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         }))
     }, []);
 
+    // Toggle screenshare
     const present = useMemo(() => async (state: MediaStream | null) => {
         if(!state) {
             const shareSocket = io('http://localhost:3001');
@@ -371,6 +390,58 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         }
     }, []);
 
+    // Toggle record meeting
+    const record = useMemo(() => async (state: boolean) => {
+        if(!selfStream) return;
+        if(state) {
+            recordingChunks.current = [];
+            const stream = await requestUserMedia('getDisplayMedia');
+
+            // Merging all audio devices
+            const audioContext = new AudioContext();
+
+            const destination = audioContext.createMediaStreamDestination();
+            const audioSources = streams.map(s => s.stream.getAudioTracks()[0]);
+            const audioSourcesTracks: MediaStreamAudioSourceNode[] = [];
+            audioSources.forEach(track => {
+                if(track) {
+                    audioSourcesTracks.push(audioContext.createMediaStreamSource(new MediaStream([track])));
+                }
+            });
+            audioSourcesTracks.forEach(source => source.connect(destination));
+
+            const selfSource = audioContext.createMediaStreamSource(new MediaStream([selfStream.getAudioTracks()[0]]));
+            selfSource.connect(destination);
+
+            // Merging audio devices with video
+            let tracks: any = [];
+            tracks = tracks.concat(destination.stream.getTracks());
+            tracks = tracks.concat(stream.getTracks());
+            const newStream = new MediaStream(tracks);
+            
+            // Record the newly merged video/audio tracks
+            const recorder = new MediaRecorder(newStream);
+            recorder.start();
+            recorder.ondataavailable = (e: any) => recordingChunks.current.push(e.data);
+            setIsRecording({recorder, stream});
+        } else {
+            if(!isRecording) return;
+            isRecording.recorder.stop();
+            setTimeout(() => {
+                var blob = new Blob(recordingChunks.current, {
+                    type: "video/webm"
+                });
+                var url = URL.createObjectURL(blob);
+
+                setModal(<RecordedVideoModal video={url} />)
+                setIsRecording((previous: any) => {
+                    previous.stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
+                    return null;
+                });
+            }, 100);
+        }
+    }, [isRecording, streams, selfStream]);
+
 
     const value = {
         roomId,
@@ -389,7 +460,9 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         setPinned,
         setSelfMute,
         present,
-        presentation
+        presentation,
+        record,
+        isRecording
     }
     
     return(

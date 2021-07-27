@@ -7,11 +7,12 @@ import { ControlButton } from "./ControlButton";
 import { IsMutedIcon } from "./IsMutedIcon";
 import { MicButton } from "./MicButton";
 import { PresentIcon } from "./PresentIcon";
+import { RecordIcon } from "./RecordIcon";
 import { SettingsModal } from "./SettingsModal";
 import { UnreadMarker } from "./UnreadMarker";
 
 export const Controls = () => {
-    const { toggleMute, toggleCamera, isMuted, hasCamera, leaveRoom, present, presentation } = useRoom();
+    const { toggleMute, toggleCamera, isMuted, hasCamera, leaveRoom, present, presentation, record, isRecording } = useRoom();
     const { setOpen, open, unread } = useChat();
     const { setModal } = useModal();
 
@@ -32,6 +33,13 @@ export const Controls = () => {
                     onClick={() => present(presentation)}
                 >
                     <PresentIcon />
+                </ControlButton>
+                <ControlButton
+                    tooltip={!isRecording ? 'Record Meeting' : 'Stop Recording'}
+                    active={isRecording !== null}
+                    onClick={() => record(isRecording ? false : true)}
+                >
+                    <RecordIcon />
                 </ControlButton>
                 <ControlButton 
                     active={true}

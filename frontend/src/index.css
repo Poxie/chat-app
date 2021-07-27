@@ -37,6 +37,11 @@ code {
     monospace;
 }
 
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
 .feedback-tip {
   position: fixed;
   bottom: -56px;
