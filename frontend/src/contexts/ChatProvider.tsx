@@ -27,8 +27,8 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
     const [notifications, setNotification] = useState<ChatNotification[]>([]);
 
     useEffect(() => {
-        isOpen.current = open;
-    }, [open]);
+        isOpen.current = open && type === 'chat';
+    }, [open, type]);
 
     const sendMessage = useMemo(() => (value: string) => {
         socket.emit('send-message', ({ roomId, content: value, author: {username: user.username, id: socket.id}}));
@@ -74,6 +74,7 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
     const closeNotifications = useMemo(() => () => {
         setNotification([]);
         toggleSidebar(true, 'chat');
+        isOpen.current = true;
     }, []);
 
     const value = {
