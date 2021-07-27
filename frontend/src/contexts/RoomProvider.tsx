@@ -37,6 +37,7 @@ interface ContextType {
     presentation: MediaStream | null;
     record: (state: boolean) => void;
     isRecording: null | typeof MediaRecorder;
+    isCurrentlyRecording: false | User;
 }
 // @ts-ignore
 const RoomContext = createContext<ContextType>(null);
@@ -76,6 +77,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     const devicesRef = useRef(devices);
     const changeDevice = useRef<null | (() => void)>(null);
     const [isRecording, setIsRecording] = useState<null | typeof MediaRecorder>(null);
+    const [isCurrentlyRecording, setIsCurrentlyRecording] = useState<false | User>(false);
     const recordingChunks = useRef<any>([]);
 
     useEffect(() => {
@@ -206,6 +208,14 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                 })
                 return newStreams;
             })
+        })
+        // Handling recordings
+        socket.on('record-start', ({ user }) => {
+            setIsCurrentlyRecording(user);
+        })
+        socket.on('record-stop', ({ user }) => {
+            setIsCurrentlyRecording(false);
+            setFeedback(`${user.username} stopped recording`);
         })
 
         // Handling users joining
@@ -397,6 +407,12 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             recordingChunks.current = [];
             const stream = await requestUserMedia('getDisplayMedia');
 
+            // Telling the other participants
+            socket.emit('record-start', ({ roomId, user: selfUser.current }));
+            setIsCurrentlyRecording(selfUser.current);
+
+            await new Promise((resolve, reject) => setTimeout(() => resolve(true), 5000));
+
             // Merging all audio devices
             const audioContext = new AudioContext();
 
@@ -427,6 +443,10 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         } else {
             if(!isRecording) return;
             isRecording.recorder.stop();
+
+            // Notifying participants of record event
+            socket.emit('record-stop', ({ user: selfUser.current, roomId }));
+
             setTimeout(() => {
                 var blob = new Blob(recordingChunks.current, {
                     type: "video/webm"
@@ -438,6 +458,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                     previous.stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
                     return null;
                 });
+                setIsCurrentlyRecording(false);
             }, 100);
         }
     }, [isRecording, streams, selfStream]);
@@ -462,7 +483,8 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         present,
         presentation,
         record,
-        isRecording
+        isRecording,
+        isCurrentlyRecording
     }
     
     return(

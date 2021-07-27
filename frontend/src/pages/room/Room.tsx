@@ -8,7 +8,7 @@ import { RoomView } from "./RoomView";
 import { WaitingRoom } from "./WaitingRoom";
 
 export const Room = () => {
-    const { isConnected, selfStream, hasCamera, isMuted } = useRoom();
+    const { isConnected, selfStream, hasCamera, isMuted, isCurrentlyRecording } = useRoom();
     const { user } = useAuthentication();
     const [hasStreamPopup, setHasStreamPopup] = useState(true);
 
@@ -29,7 +29,9 @@ export const Room = () => {
                         onMinimize={setHasStreamPopup}
                     />
                 )}
-                <RoomView />
+                <RoomView 
+                    isCurrentlyRecording={isCurrentlyRecording}
+                />
                 </>
             ) : (
                 <WaitingRoom />
