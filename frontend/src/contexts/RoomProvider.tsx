@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, DispatchWithoutAction, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { io, Socket } from 'socket.io-client';
 import Peer from 'peerjs';
@@ -39,6 +39,7 @@ interface ContextType {
     record: (state: boolean) => void;
     isRecording: null | typeof MediaRecorder;
     isCurrentlyRecording: false | User;
+    [x: string]: any;
 }
 // @ts-ignore
 const RoomContext = createContext<ContextType>(null);
@@ -55,6 +56,83 @@ export const generateId = () => {
     }
     return id;
 }
+
+interface States {
+    selfStream: null | MediaStream;
+    presentation: any,
+    streams: Stream[];
+    isMuted: boolean;
+    hasCamera: boolean;
+    isConnected: boolean;
+    isRecording: null | typeof MediaRecorder;
+    isCurrentlyRecording: false | User;
+    [x: string]: any;
+}
+const initialState: States = {
+    selfStream: null,
+    presentation: null,
+    streams: [],
+    isMuted: false,
+    hasCamera: true,
+    isConnected: false,
+    isRecording: null,
+    isCurrentlyRecording: false
+}
+interface ReducerAction {
+    type?: any;
+    property: any;
+    payload: any;
+}
+
+const reducer = (state: States, action: ReducerAction) => {
+    if(!state) return initialState;
+    if(!action) return state;
+    if(!action.type) action.type = 'simple-property';
+    const { type, property, payload } = action;
+
+    const updateState = (property: string, value: any) => {
+        return {...state, ...{[property]: value}};
+    }
+
+    switch(type) {
+        case 'simple-property':
+            return updateState(property, payload);
+        case 'close-presentation':
+            state[property].getTracks().forEach((track: MediaStreamTrack) => track.stop());
+            return updateState(property, payload);
+        case 'add-stream':
+            if(payload.isPinned) state.streams.forEach(stream => stream.isPinned = false);
+            const streams = [...state.streams, ...[payload]];
+            return updateState('streams', streams);
+        case 'remove-stream': {
+            const newStreams = state.streams.filter(stream => {
+                if(stream.user.id !== payload) {
+                    return stream;
+                } else {
+                    stream.stream.getTracks().forEach(track => track.stop());
+                }
+            })
+            return updateState('streams', newStreams);
+        }
+        case 'stream-property': {
+            const newStreams = state.streams.map(stream => {
+                if(stream.user.id === payload.userId || stream.stream.id === payload.streamId) {
+                    // @ts-ignore
+                    stream[payload.property] = payload.value;
+                } else {
+                    if(payload.property === 'isPinned') {
+                        stream.isPinned = false;
+                    }
+                }
+                return stream;
+            })
+            return updateState('streams', newStreams);
+        }
+        default:
+            return state;
+    }
+}
+
 interface Props {
     children: any;
 }
@@ -62,22 +140,17 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     const { roomId } = useParams<Params>();
     const { user } = useAuthentication();
     const { setModal } = useModal();
-    const [selfStream, setSelfStream] = useState<MediaStream | null>(null);
-    const [presentation, setPresentation] = useState<MediaStream | null>(null);
-    const presentationPeer = useRef<any>(null);
-    const selfUser = useRef<any>(null);
-    const [streams, setStreams] = useState<Stream[]>([]);
-    const [isMuted, setIsMuted] = useState(false);
-    const [hasCamera, setHasCamera] = useState(true);
-    const isMutedRef = useRef(false);
-    const hasCameraRef = useRef(true);
-    const [isConnected, setIsConnected] = useState(false);
     const { setFeedback } = useFeedback();
     const { devices } = useDevice();
+    const [state, dispatch] = useReducer(reducer, initialState);
+    const { selfStream, streams, isConnected, isRecording } = state;
+
+    const presentationPeer = useRef<any>(null);
+    const selfUser = useRef<any>(null);
+    const isMutedRef = useRef(false);
+    const hasCameraRef = useRef(true);
     const devicesRef = useRef(devices);
     const changeDevice = useRef<null | (() => void)>(null);
-    const [isRecording, setIsRecording] = useState<null | typeof MediaRecorder>(null);
-    const [isCurrentlyRecording, setIsCurrentlyRecording] = useState<false | User>(false);
     const recordingChunks = useRef<any>([]);
     const { addAttachment } = useAttachments();
 
@@ -158,35 +231,32 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             if(list[call.peer]) return;
             list[call.peer] = call;
             const stream = getNewStream(userVideoStream, user, userIsMuted, userHasCamera, false, streamIsPresentation);
-            setStreams(previous => {
-                if(previous.filter(s => s.user.id === stream.user.id).length) return previous;
-                return [...previous, ...[stream]];
-            });
+            dispatch({type: 'add-stream', property: 'streams', payload: stream});
         })
     }, []);
 
     // Initiate device permission
     useEffect(() => {
         requestUserMedia().then(stream => {
-            setSelfStream(stream)
+            dispatch({property: 'selfStream', payload: stream});
         });
     }, []);
 
     const leaveRoom = useMemo(() => () => {
-        setIsConnected(false);
-        setStreams([]);
+        dispatch({property: 'isConnected', payload: false});
+        dispatch({property: 'streams', payload: []});
         const { id, username } = selfUser.current;
         socket.emit('leave-room', {roomId, user: {username, id}});
-    }, [setIsConnected, roomId]);
+    }, [roomId]);
     const joinRoom = useMemo(() => () => {
-        setIsConnected(true);
+        dispatch({property: 'isConnected', payload: true});
         initiateRoomConnection();
-    }, [setIsConnected]);
+    }, []);
     const initiateRoomConnection = async () => {
         // Creating peer connection
         const { stream, peer, user: newUser } = await createMemberConnection(socket, user, isMutedRef.current, hasCameraRef.current);
         selfUser.current = newUser;
-        setSelfStream(stream);
+        dispatch({property: 'selfStream', payload: stream});
         
         // Answer calls if received
         peer.on('call', call => {
@@ -195,40 +265,18 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
 
         // Handling users toggling microphone
         socket.on('toggle-mute', ({ isMuted, streamId, userId }: any) => {
-            setStreams(previous => {
-                const newStreams = previous.map(stream => {
-                    if(stream.stream.id == streamId) {
-                        stream.isMuted = isMuted;
-                    }
-                    if(stream.user.id === userId) {
-                        stream.isMuted = isMuted;
-                    }
-                    return stream;
-                })
-                return newStreams;
-            })
+            dispatch({type: 'stream-property', property: 'isMuted', payload: {userId, streamId, property: 'isMuted', value: isMuted}})
         })
         // Handling users toggling camera
         socket.on('toggle-camera', ({ hasCamera, streamId, userId }: any) => {
-            setStreams(previous => {
-                const newStreams = previous.map(stream => {
-                    if(stream.stream.addEventListener == streamId) {
-                        stream.hasCamera = hasCamera;
-                    }
-                    if(stream.user.id === userId) {
-                        stream.hasCamera = hasCamera;
-                    }
-                    return stream;
-                })
-                return newStreams;
-            })
+            dispatch({type: 'stream-property', property: 'hasCamera', payload: {userId, streamId, property: 'hasCamera', value: hasCamera}})
         })
         // Handling recordings
         socket.on('record-start', ({ user }) => {
-            setIsCurrentlyRecording(user);
+            dispatch({property: 'isCurrentlyRecording', payload: user});
         })
         socket.on('record-stop', ({ user, blob }) => {
-            setIsCurrentlyRecording(false);
+            dispatch({property: 'isCurrentlyRecording', payload: false});
             setFeedback(`${user.username} stopped recording`);
             addAttachment('video', blob, true);
         })
@@ -251,10 +299,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                 if(callList[call.peer]) return;
                 callList[call.peer] = call;
                 const stream = getNewStream(userVideoStream, user, isMuted, hasCamera, true, isPresentation, isPresentation);
-                setStreams(previous => {
-                    if(isPresentation) previous.forEach(stream => stream.isPinned = false);
-                    return [...previous, ...[stream]];
-                });
+                dispatch({type: 'add-stream', property: 'streams', payload: stream});
             })
             
             // Making it possible to change device during meeting
@@ -264,7 +309,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                     if(isMutedRef.current) enabledAudio(stream, false);
                     if(!hasCameraRef.current) enabledVideo(stream, false);
                     call.peerConnection.getSenders()[0].replaceTrack(stream.getTracks()[0]);
-                    setSelfStream(stream);
+                    dispatch({property: 'selfStream', payload: stream});
                 })
             }
             changeDevice.current = deviceChange;
@@ -287,70 +332,40 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     }, [isConnected])
 
     const animateUserDisconnection = useMemo(() => (userId: string) => {
-        setStreams(previous => {
-            previous.forEach(stream => {
-                if(stream.user.id == userId) {
-                    stream.disconnected = true;
-                }
-            })
-            return previous;
-        })
-    }, [setStreams]);
+        dispatch({type: 'stream-property', property: 'streams', payload: {userId, property: 'disconnected', value: true}});
+    }, []);
 
     // Handling stream changes - mute, deafen, camera
     const toggleMute = useMemo(() => () => {
         if(!selfStream) return;
         const enabled = enabledAudio(selfStream, 'toggle');
         socket.emit('toggle-mute', ({ roomId, isMuted: enabled, streamId: selfStream.id, userId: selfUser.current?.id }))
-        setIsMuted(enabled);
+        dispatch({property: 'isMuted', payload: enabled});
         isMutedRef.current = enabled;
     }, [selfStream, roomId]);
     const toggleCamera = useMemo(() => () => {
         if(!selfStream) return;
         const enabled = enabledVideo(selfStream, 'toggle');
         socket.emit('toggle-camera', ({ roomId, hasCamera: enabled, streamId: selfStream.id, userId: selfUser.current?.id }))
-        setHasCamera(enabled);
+        dispatch({property: 'hasCamera', payload: enabled});
         hasCameraRef.current = enabled;
     }, [selfStream, roomId]);
     const setSelfMute = useMemo(() => (userId: string, state: boolean) => {
-        setStreams(previous => previous.map(stream => {
-            if(stream.user.id === userId) {
-                stream.selfMuted = state;
-            }
-            return stream;
-        }))
+        dispatch({type: 'stream-property', property: 'streams', payload: {userId, property: 'selfMuted', value: state}});
     }, []);
     
     // Remove stream after disconnect animation
     const removeStream = useMemo(() => (userId: string) => {
-        setStreams(previous => {
-            const newStreams = previous.filter(stream => {
-                if(stream.user.id !== userId) {
-                    return stream;
-                } else {
-                    stream.stream.getAudioTracks().forEach(track => track.stop());
-                    stream.stream.getVideoTracks().forEach(track => track.stop());
-                }
-            })
-            return newStreams;
-        });
+        dispatch({type: 'remove-stream', property: 'streams', payload: userId});
     }, []);
     // Remove connecting status
     const setConnected = useMemo(() => (userId: string) => {
-        setStreams(previous => previous.map(stream => {
-            if(stream.user.id === userId) {
-                stream.connecting = false;
-            }
-            return stream;
-        }))
+        dispatch({type: 'stream-property', property: 'streams', payload: {userId, property: 'connecting', value: false}});
     }, []);
 
     // Pinning streams
     const setPinned = useMemo(() => (userId: string | null) => {
-        setStreams(previous => previous.map(stream => {
-            stream.isPinned = stream.user.id === userId;
-            return stream;
-        }))
+        dispatch({type: 'stream-property', property: 'streams', payload: {userId, property: 'isPinned', value: userId !== null}});
     }, []);
 
     // Toggle screenshare
@@ -373,7 +388,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             });
             peer.on('open', id => {
                 presentationPeer.current = peer;
-                setPresentation(stream);
+                dispatch({property: 'presentation', payload: stream});
             })
             peer.on('call', call => {
                 answerCall(call, stream, false, true, true);
@@ -385,19 +400,13 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             // Checking for stream end (without click of stream button)
             stream.getTracks()[0].addEventListener('ended', () => {
                 presentationPeer.current.disconnect();
-                setPresentation(previous => {
-                    previous?.getTracks().forEach(track => track.stop());
-                    return null;
-                });
+                dispatch({type: 'close-presentation', property: 'presentation', payload: null});
             })
         } else {
             // Closing screenshare connection
             if(!presentationPeer.current) return;
             presentationPeer.current.disconnect();
-            setPresentation(previous => {
-                previous?.getTracks().forEach(track => track.stop());
-                return null;
-            });
+            dispatch({type: 'close-presentation', property: 'presentation', payload: null});
         }
     }, []);
 
@@ -410,7 +419,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
 
             // Telling the other participants
             socket.emit('record-start', ({ roomId, user: selfUser.current }));
-            setIsCurrentlyRecording(selfUser.current);
+            dispatch({property: 'isCurrentlyRecording', payload: selfUser.current});
 
             await new Promise((resolve, reject) => setTimeout(() => resolve(true), 5000));
 
@@ -440,10 +449,11 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             const recorder = new MediaRecorder(newStream);
             recorder.start();
             recorder.ondataavailable = (e: any) => recordingChunks.current.push(e.data);
-            setIsRecording({recorder, stream});
+            dispatch({property: 'isRecording', payload: {recorder, stream}});
         } else {
             if(!isRecording) return;
             isRecording.recorder.stop();
+            isRecording.stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
 
             setTimeout(() => {
                 var blob = new Blob(recordingChunks.current, {
@@ -458,36 +468,28 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                 addAttachment('video', url, true);
 
                 setModal(<RecordedVideoModal video={url} />)
-                setIsRecording((previous: any) => {
-                    previous.stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
-                    return null;
-                });
-                setIsCurrentlyRecording(false);
+
+                dispatch({property: 'isRecording', payload: null});
+                dispatch({property: 'isCurrentlyRecording', payload: false});
             }, 100);
         }
     }, [isRecording, streams, selfStream]);
 
-    const value = {
-        roomId,
-        selfStream,
-        streams,
-        toggleMute,
-        toggleCamera,
-        removeStream,
-        isMuted,
-        hasCamera,
-        socket,
-        setConnected,
-        joinRoom,
-        leaveRoom,
-        isConnected,
-        setPinned,
-        setSelfMute,
-        present,
-        presentation,
-        record,
-        isRecording,
-        isCurrentlyRecording
+    const value = {...state,
+        ...{
+            roomId,
+            toggleMute,
+            toggleCamera,
+            removeStream,
+            socket,
+            setConnected,
+            joinRoom,
+            leaveRoom,
+            setPinned,
+            setSelfMute,
+            present,
+            record,
+        }
     }
     
     return(
