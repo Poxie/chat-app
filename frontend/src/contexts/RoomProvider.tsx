@@ -201,6 +201,8 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
 
                 // Muting stream if isMuted is true
                 if(isMuted) enabledAudio(stream, false);
+                // Disabling camera if hasCamera is false
+                if(!hasCamera) enabledVideo(stream, false);
                 return { stream, peer, user: newUser };
             })
     }
