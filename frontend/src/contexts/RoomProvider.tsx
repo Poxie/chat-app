@@ -71,7 +71,6 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     const [hasCamera, setHasCamera] = useState(true);
     const isMutedRef = useRef(false);
     const hasCameraRef = useRef(true);
-    const [forceUpdate, setForceUpdate] = useState(0);
     const [isConnected, setIsConnected] = useState(false);
     const { setFeedback } = useFeedback();
     const { devices } = useDevice();
@@ -158,7 +157,6 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         call.on('stream', userVideoStream => {
             if(list[call.peer]) return;
             list[call.peer] = call;
-            console.log(streamIsPresentation);
             const stream = getNewStream(userVideoStream, user, userIsMuted, userHasCamera, false, streamIsPresentation);
             setStreams(previous => {
                 if(previous.filter(s => s.user.id === stream.user.id).length) return previous;
@@ -167,11 +165,13 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         })
     }, []);
 
+    // Initiate device permission
     useEffect(() => {
         requestUserMedia().then(stream => {
             setSelfStream(stream)
         });
     }, []);
+
     const leaveRoom = useMemo(() => () => {
         setIsConnected(false);
         setStreams([]);
@@ -183,10 +183,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         initiateRoomConnection();
     }, [setIsConnected]);
     const initiateRoomConnection = async () => {
-        // Saving all calls for when we close 
-        const calls: any = {};
-
-        console.log(isMutedRef.current);
+        // Creating peer connection
         const { stream, peer, user: newUser } = await createMemberConnection(socket, user, isMutedRef.current, hasCameraRef.current);
         selfUser.current = newUser;
         setSelfStream(stream);
@@ -196,7 +193,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             answerCall(call, stream, isMutedRef.current, hasCameraRef.current);
         })
 
-        // Handling users muting themselves
+        // Handling users toggling microphone
         socket.on('toggle-mute', ({ isMuted, streamId, userId }: any) => {
             setStreams(previous => {
                 const newStreams = previous.map(stream => {
@@ -211,7 +208,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                 return newStreams;
             })
         })
-        // Handling users enabling camera
+        // Handling users toggling camera
         socket.on('toggle-camera', ({ hasCamera, streamId, userId }: any) => {
             setStreams(previous => {
                 const newStreams = previous.map(stream => {
@@ -237,11 +234,10 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         })
 
         // Handling users joining
-        let callList: any = {};
         socket.on('user-connected', ({ user, isMuted, hasCamera, isPresentation }: any) => {
-            console.log(`User connected: ${user.id}`)
             setFeedback(!isPresentation ? `${user.username} connected` : `${user.username} is presenting`);
 
+            // Sending self stream to new user
             const call = peer.call(user.id, stream, {
                 metadata: {
                     user: newUser,
@@ -249,38 +245,22 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                     hasCamera: hasCameraRef.current,
                 }
             });
-            let userStream: null | MediaStream = null;
+
             const callList: any = {};
             call.on('stream', userVideoStream => {
                 if(callList[call.peer]) return;
                 callList[call.peer] = call;
-                userStream = userVideoStream;
                 const stream = getNewStream(userVideoStream, user, isMuted, hasCamera, true, isPresentation, isPresentation);
                 setStreams(previous => {
                     if(isPresentation) previous.forEach(stream => stream.isPinned = false);
                     return [...previous, ...[stream]];
                 });
             })
-            call.on('close', () => {
-                setStreams(previous => previous.filter(s => s.stream !== userStream));
-            })
-            call.on('error', error => {
-                console.log(error);
-            })
-            
-            calls[user.id] = call;
             
             // Making it possible to change device during meeting
             const deviceChange = () => {
                 const { video, audio } = devicesRef.current;
-                navigator.mediaDevices.getUserMedia({
-                    video: {
-                        deviceId: video
-                    },
-                    audio: {
-                        deviceId: audio
-                    }
-                }).then(stream => {
+                requestUserMedia('getUserMedia', video, audio).then(stream => {
                     if(isMutedRef.current) enabledAudio(stream, false);
                     if(!hasCameraRef.current) enabledVideo(stream, false);
                     call.peerConnection.getSenders()[0].replaceTrack(stream.getTracks()[0]);
@@ -292,13 +272,14 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
 
         // Handling users leaving
         socket.on('user-disconnected', ({ user, isPresentation }) => {
-            console.log('User disconnected');
             animateUserDisconnection(user.id);
             setFeedback(!isPresentation ? `${user.username} disconnected` : `${user.username} stopped presenting`);
         })
     };
     useEffect(() => {
         if(isConnected) return;
+
+        // If disconnect, stop listening to events
         socket.off('user-disconnected');
         socket.off('user-connected');
         socket.off('toggle-mute');
@@ -308,7 +289,6 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     const animateUserDisconnection = useMemo(() => (userId: string) => {
         setStreams(previous => {
             previous.forEach(stream => {
-                console.log(stream.user.id, userId);
                 if(stream.user.id == userId) {
                     stream.disconnected = true;
                 }
@@ -317,6 +297,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         })
     }, [setStreams]);
 
+    // Handling stream changes - mute, deafen, camera
     const toggleMute = useMemo(() => () => {
         if(!selfStream) return;
         const enabled = enabledAudio(selfStream, 'toggle');
@@ -375,9 +356,11 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     // Toggle screenshare
     const present = useMemo(() => async (state: MediaStream | null) => {
         if(!state) {
+            // Creating a new connection for the screenshare
             const shareSocket = io('http://localhost:3001');
             const { peer, stream, user } = await createMemberConnection(shareSocket, selfUser.current, false, true, 'getDisplayMedia', true);
 
+            // If user join, send persentation to them as well
             shareSocket.on('user-connected', ({ user: connectedUser }) => {
                 peer.call(connectedUser.id, stream, {
                     metadata: {
@@ -408,6 +391,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                 });
             })
         } else {
+            // Closing screenshare connection
             if(!presentationPeer.current) return;
             presentationPeer.current.disconnect();
             setPresentation(previous => {
@@ -482,7 +466,6 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             }, 100);
         }
     }, [isRecording, streams, selfStream]);
-
 
     const value = {
         roomId,
