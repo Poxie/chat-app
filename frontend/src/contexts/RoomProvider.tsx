@@ -100,6 +100,16 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             }
         })
     }, []);
+    const enabledAudio = useMemo(() => (stream: MediaStream, state: boolean | 'toggle') => {
+        const track = stream.getAudioTracks()[0];
+        track.enabled = state === 'toggle' ? !track.enabled : state;
+        return !track.enabled;
+    }, []);
+    const enabledVideo = useMemo(() => (stream: MediaStream, state: boolean | 'toggle') => {
+        const track = stream.getVideoTracks()[0];
+        track.enabled = state === 'toggle' ? !track.enabled : state;
+        return track.enabled;
+    }, []);
 
     const createMemberConnection = async (socket: Socket<DefaultEventsMap>, user: ContextUser, isMuted=false, hasCamera=true, type: 'getUserMedia' | 'getDisplayMedia'='getUserMedia', isPresentation=false) => {
         return requestUserMedia(type)
@@ -116,6 +126,9 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                 peer.on('disconnected', () => {
                     socket.emit('leave-room', ({ roomId, user: newUser, isPresentation }));
                 })
+
+                // Muting stream if isMuted is true
+                if(isMuted) enabledAudio(stream, false);
                 return { stream, peer, user: newUser };
             })
     }
@@ -133,8 +146,8 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         }
     }, []);
     const answerCall = useMemo(() => (call: Peer.MediaConnection, stream: MediaStream, isMuted?: boolean, hasCamera?: boolean, isPresentation?: boolean) => {
-        if(isMuted) stream.getAudioTracks()[0].enabled = false;
-        if(!hasCamera) stream.getVideoTracks()[0].enabled = false;
+        if(isMuted) enabledAudio(stream, false);
+        if(!hasCamera) enabledVideo(stream, false);
         call.answer(stream);
         if(isPresentation) return;
 
@@ -172,6 +185,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         // Saving all calls for when we close 
         const calls: any = {};
 
+        console.log(isMutedRef.current);
         const { stream, peer, user: newUser } = await createMemberConnection(socket, user, isMutedRef.current, hasCameraRef.current);
         selfUser.current = newUser;
         setSelfStream(stream);
@@ -266,8 +280,8 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                         deviceId: audio
                     }
                 }).then(stream => {
-                    if(isMutedRef.current) stream.getAudioTracks()[0].enabled = false;
-                    if(!hasCameraRef.current) stream.getVideoTracks()[0].enabled = false;
+                    if(isMutedRef.current) enabledAudio(stream, false);
+                    if(!hasCameraRef.current) enabledVideo(stream, false);
                     call.peerConnection.getSenders()[0].replaceTrack(stream.getTracks()[0]);
                     setSelfStream(stream);
                 })
@@ -304,19 +318,17 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
 
     const toggleMute = useMemo(() => () => {
         if(!selfStream) return;
-        const track = selfStream.getAudioTracks()[0];
-        track.enabled = !track.enabled;
-        socket.emit('toggle-mute', ({ roomId, isMuted: !track.enabled, streamId: selfStream.id, userId: selfUser.current?.id }))
-        setIsMuted(!track.enabled);
-        isMutedRef.current = !track.enabled;
+        const enabled = enabledAudio(selfStream, 'toggle');
+        socket.emit('toggle-mute', ({ roomId, isMuted: enabled, streamId: selfStream.id, userId: selfUser.current?.id }))
+        setIsMuted(enabled);
+        isMutedRef.current = enabled;
     }, [selfStream, roomId]);
     const toggleCamera = useMemo(() => () => {
         if(!selfStream) return;
-        const track = selfStream.getVideoTracks()[0];
-        track.enabled = !track.enabled;
-        socket.emit('toggle-camera', ({ roomId, hasCamera: track.enabled, streamId: selfStream.id, userId: selfUser.current?.id }))
-        setHasCamera(track.enabled);
-        hasCameraRef.current = track.enabled;
+        const enabled = enabledVideo(selfStream, 'toggle');
+        socket.emit('toggle-camera', ({ roomId, hasCamera: enabled, streamId: selfStream.id, userId: selfUser.current?.id }))
+        setHasCamera(enabled);
+        hasCameraRef.current = enabled;
     }, [selfStream, roomId]);
     const setSelfMute = useMemo(() => (userId: string, state: boolean) => {
         setStreams(previous => previous.map(stream => {
