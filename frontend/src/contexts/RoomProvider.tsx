@@ -151,14 +151,15 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         call.answer(stream);
         if(isPresentation) return;
 
-        const { isMuted: userIsMuted, hasCamera: userHasCamera, user } = call.metadata;
+        const { isMuted: userIsMuted, hasCamera: userHasCamera, user, isPresentation: streamIsPresentation } = call.metadata;
 
         // Preventing duplication
         let list: any = {};
         call.on('stream', userVideoStream => {
             if(list[call.peer]) return;
             list[call.peer] = call;
-            const stream = getNewStream(userVideoStream, user, userIsMuted, userHasCamera);
+            console.log(streamIsPresentation);
+            const stream = getNewStream(userVideoStream, user, userIsMuted, userHasCamera, false, streamIsPresentation);
             setStreams(previous => {
                 if(previous.filter(s => s.user.id === stream.user.id).length) return previous;
                 return [...previous, ...[stream]];
@@ -245,7 +246,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                 metadata: {
                     user: newUser,
                     isMuted: isMutedRef.current,
-                    hasCamera: hasCameraRef.current
+                    hasCamera: hasCameraRef.current,
                 }
             });
             let userStream: null | MediaStream = null;
@@ -382,7 +383,8 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                     metadata: {
                         user,
                         isMuted: false,
-                        hasCamera: true
+                        hasCamera: true,
+                        isPresentation: true
                     }
                 });
             });
