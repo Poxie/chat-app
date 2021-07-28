@@ -330,7 +330,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     // Remove stream after disconnect animation
     const removeStream = useMemo(() => (userId: string) => {
         setStreams(previous => {
-            previous.filter(stream => {
+            const newStreams = previous.filter(stream => {
                 if(stream.user.id !== userId) {
                     return stream;
                 } else {
@@ -338,7 +338,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
                     stream.stream.getVideoTracks().forEach(track => track.stop());
                 }
             })
-            return previous;
+            return newStreams;
         });
     }, []);
     // Remove connecting status
