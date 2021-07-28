@@ -180,9 +180,9 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
         updateStreamStyle('top', `${top}px`);
     }, [streamAmount]);
     
-    const resizeStreams = () => {
+    const resizeStreams = (streamAmount: number) => {
         if(!streamAmount || !streamContainer.current || !container.current || orderId === undefined) return;
-        
+
         // Calculating the amount of streams per row
         let rowAmount;
         if(streamAmount / 2 === 1) {
@@ -236,13 +236,24 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
         setTop();
     }
     useEffect(() => {
-        window.addEventListener('resize', resizeStreams);
-        return () => window.removeEventListener('resize', resizeStreams);
+        if(!streamAmount) return;
+        const handleResize = () => resizeStreams(streamAmount);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
     }, [streamAmount, isPinned, pinnedStream, pinnedStreamIsBefore]);
-    useEffect(resizeStreams, [streamAmount, orderId, pinnedStream, notPinnedIndex, isPinned, selfMuted]);
     useEffect(() => {
-        setTimeout(resizeStreams, 400);
-    }, [open]);
+        if(!streamAmount) return;
+        resizeStreams(streamAmount);
+    }, [streamAmount, orderId, pinnedStream, notPinnedIndex, isPinned, selfMuted]);
+    useEffect(() => {
+        if(!streamAmount) return;
+        setTimeout(() => resizeStreams(streamAmount), 400);
+    }, [open, streamAmount]);
+    useEffect(() => {
+        if(!streamAmount) return;
+        resizeStreams(streamAmount);
+        console.log(streamAmount)
+    }, [streamAmount]);
 
     let topVisuals;
     if(isMuted && !selfMuted) {
