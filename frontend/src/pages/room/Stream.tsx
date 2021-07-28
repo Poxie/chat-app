@@ -275,6 +275,7 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
                         setPinned={() => setPinned(isPinned ? null : user.id)}
                         isSelfMuted={selfMuted}
                         setSelfMuted={() => setSelfMute(user.id, !selfMuted)}
+                        streamAmount={streamAmount}
                     />
                 )}
                 </>

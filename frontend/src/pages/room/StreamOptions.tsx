@@ -7,14 +7,17 @@ interface Props {
     setPinned: () => void;
     isSelfMuted?: boolean;
     setSelfMuted: () => void;
+    streamAmount: number | undefined;
 }
-export const StreamOptions: React.FC<Props> = ({ isPinned, setPinned, isSelfMuted, setSelfMuted }) => {
+export const StreamOptions: React.FC<Props> = ({ isPinned, setPinned, isSelfMuted, setSelfMuted, streamAmount }) => {
     return(
         <Flex className="stream-options" alignItems={'center'}>
-            <PinIcon 
-                active={isPinned}
-                onClick={setPinned}
-            />
+            <div className={streamAmount === 1 ? 'disabled' : ''}>
+                <PinIcon 
+                    active={isPinned}
+                    onClick={setPinned}
+                />
+            </div>
             <SpeakerIcon 
                 active={!isSelfMuted}
                 onClick={setSelfMuted}
