@@ -198,7 +198,7 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
                 rowAmount = Math.floor((streamAmount - 1)/5) * 1 + 2;
             }
             if(!isPinned) {
-                rowAmount = 2;
+                rowAmount = streamAmount === 2 ? 1 : 2;
                 amountOfRows = Math.floor(streamAmount / 2);
                 console.log(amountOfRows);
             }
