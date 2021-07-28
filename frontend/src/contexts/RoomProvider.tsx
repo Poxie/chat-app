@@ -142,6 +142,8 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     const { setModal } = useModal();
     const { setFeedback } = useFeedback();
     const { devices } = useDevice();
+    const { addAttachment } = useAttachments();
+    
     const [state, dispatch] = useReducer(reducer, initialState);
     const { selfStream, streams, isConnected, isRecording } = state;
 
@@ -151,8 +153,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     const hasCameraRef = useRef(true);
     const devicesRef = useRef(devices);
     const changeDevice = useRef<null | (() => void)>(null);
-    const recordingChunks = useRef<any>([]);
-    const { addAttachment } = useAttachments();
+    const recordedChunks = useRef<any>([]);
 
     useEffect(() => {
         devicesRef.current = devices;
@@ -416,7 +417,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     const record = useMemo(() => async (state: boolean) => {
         if(!selfStream) return;
         if(state) {
-            recordingChunks.current = [];
+            recordedChunks.current = [];
             const stream = await requestUserMedia('getDisplayMedia');
 
             // Telling the other participants
@@ -450,7 +451,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             // Record the newly merged video/audio tracks
             const recorder = new MediaRecorder(newStream);
             recorder.start();
-            recorder.ondataavailable = (e: any) => recordingChunks.current.push(e.data);
+            recorder.ondataavailable = (e: any) => recordedChunks.current.push(e.data);
             dispatch({property: 'isRecording', payload: {recorder, stream}});
         } else {
             if(!isRecording) return;
@@ -458,7 +459,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             isRecording.stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
 
             setTimeout(() => {
-                var blob = new Blob(recordingChunks.current, {
+                var blob = new Blob(recordedChunks.current, {
                     type: "video/webm"
                 });
                 var url = URL.createObjectURL(blob);
