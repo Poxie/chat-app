@@ -1,0 +1,4 @@
+{
+    "WEBSOCKET_ENDPOINT": "http://localhost:3001",
+    "PEER_SERVER_ENDPOINT": "localhost:3002"
+}

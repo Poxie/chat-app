@@ -14,8 +14,9 @@ import { RequestMediaType } from "../types/RequestMediaType";
 import { useModal } from "./ModalProvider";
 import { RecordedVideoModal } from "../pages/room/RecordedVideoModal";
 import { useAttachments } from "./AttachmentProvider";
+import { WEBSOCKET_ENDPOINT, PEER_SERVER_ENDPOINT } from '../config.json';
 
-const socket = io('http://localhost:3001');
+const socket = io(WEBSOCKET_ENDPOINT);
 
 declare var MediaRecorder: any;
 interface ContextType {
@@ -188,9 +189,10 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         return requestUserMedia(type)
             .then(stream => {
                 const id = generateId();
+                const parts = PEER_SERVER_ENDPOINT.split(':');
                 const peer = new Peer(id, {
-                    host: '/',
-                    port: 3002
+                    host: parts[0],
+                    port: parseInt(parts[1])
                 })
                 let newUser = {...user, ...{id}};
                 peer.on('open', id => {
@@ -376,7 +378,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     const present = useMemo(() => async (state: MediaStream | null) => {
         if(!state) {
             // Creating a new connection for the screenshare
-            const shareSocket = io('http://localhost:3001');
+            const shareSocket = io(WEBSOCKET_ENDPOINT);
             const { peer, stream, user } = await createMemberConnection(shareSocket, selfUser.current, false, true, 'getDisplayMedia', true);
 
             // If user join, send persentation to them as well
