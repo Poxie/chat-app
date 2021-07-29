@@ -1,0 +1,120 @@
+.home {
+    width: 1400px;
+    height: 100vh;
+    max-width: 95%;
+    margin: 0 auto;
+    color: var(--primary-text);
+    padding: 15px;
+
+    .input, .join-meeting {
+        width: 100%;
+    }
+    .button {
+        max-height: 100%;
+        padding: 6px 15px;
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+    }
+    svg {
+        fill: var(--primary-text);
+    }
+}
+.home-main {
+    max-width: 100%;
+}
+.home-header {
+    width: 600px;
+    max-width: 100%;
+    font-size: 22px;
+
+    span {
+        font-size: 18px;
+        font-family: 'Roboto', sans-serif;
+        font-weight: 400;
+        line-height: 26px;
+    }
+}
+.home-options {
+    margin-top: 35px;
+}
+.join-meeting {
+    margin-left: 25px;
+
+    input {
+        border-radius: 5px !important;
+    }
+    .button {
+        overflow: hidden;
+        position: relative;
+        padding: 6px 0;
+        width: 70px;
+        text-align: center;
+        background-color: var(--primary-background);
+        margin-left: 5px;
+        margin-right: 15px;
+
+        &:hover {
+            svg {
+                left: 50%;
+            }
+            .button-content {
+                margin-left: -100%;
+            }
+        }
+    }
+    .button-content {
+        transition: margin-left .4s;
+        min-width: 100%;
+    }
+    svg {
+        position: absolute;
+        left: 150%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        transition: left .4s;
+    }
+}
+.home-illustrations {
+    svg {
+        max-width: 100%;
+        width: 700px;
+    }
+}
+
+@media only screen and (max-width: 800px) {
+    .home {
+        flex-direction: column;
+    }
+}
+@media only screen and (max-width: 520px) {
+    .home-options {
+        flex-direction: column;
+    }
+    .join-meeting {
+        margin-left: 0;
+        margin-top: 20px;
+        flex-direction: column;
+
+        .button {
+            background-color: var(--secondary-background);
+            width: 100%;
+            margin-left: 0;
+            margin-top: 8px;
+
+            svg {
+                display: none;
+            }
+            .button-content {
+                margin-left: 0 !important;
+            }
+        }
+    }
+    .home .button {
+        padding: 12px 18px;
+        
+        .button-content {
+            margin: 0 auto;
+        }
+    }
+}
