@@ -262,7 +262,7 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
         topVisuals = <DeafenedIcon />
     }
 
-    const classNames = ['user', isSpeaking ? 'is-speaking' : '', disconnected ? 'disconnected' : '', connecting ? 'connecting' : '', selfMuted ? 'self-muted' : ''];
+    const classNames = ['user', isSpeaking && !isMuted ? 'is-speaking' : '', disconnected ? 'disconnected' : '', connecting ? 'connecting' : '', selfMuted ? 'self-muted' : ''];
     const className = classNames.filter(name => name !== '').join(' ');
     return(
         <div data-order={orderId} className={className} ref={container}>
