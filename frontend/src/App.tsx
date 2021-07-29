@@ -7,31 +7,37 @@ import { FeedbackProvider } from './contexts/FeedbackProvider';
 import { ModalProvider } from './contexts/ModalProvider';
 import { RoomProvider } from './contexts/RoomProvider';
 import { SidebarProvider } from './contexts/SidebarProvider';
+import { Home } from './pages/home/Home';
 import { Room } from './pages/room/Room';
 
 function App() {
   return (
     <div className="App">
       <Router>
-        <Route path="/:roomId" render={() => (
-          <DeviceProvider>
-            <ModalProvider>
-              <AuthenticationProvider>
-                <FeedbackProvider>
-                  <SidebarProvider>
-                    <AttachmentProvider>
-                      <RoomProvider>
-                        <ChatProvider>
-                          <Room />
-                        </ChatProvider>
-                      </RoomProvider>
-                    </AttachmentProvider>
-                  </SidebarProvider>
-                </FeedbackProvider>
-              </AuthenticationProvider>
-            </ModalProvider>
-          </DeviceProvider>
-        )} />
+        <ModalProvider>
+          <Route path="/:roomId" render={() => (
+            <DeviceProvider>
+                <AuthenticationProvider>
+                  <FeedbackProvider>
+                    <SidebarProvider>
+                      <AttachmentProvider>
+                        <RoomProvider>
+                          <ChatProvider>
+                            <Room />
+                          </ChatProvider>
+                        </RoomProvider>
+                      </AttachmentProvider>
+                    </SidebarProvider>
+                  </FeedbackProvider>
+                </AuthenticationProvider>
+            </DeviceProvider>
+          )} />
+          <Route 
+            path="/"
+            exact
+            component={Home}
+          />
+        </ModalProvider>
       </Router>
     </div>
   );
