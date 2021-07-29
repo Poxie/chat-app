@@ -32,6 +32,13 @@ export const AttachmentProvider: React.FC<Props> = ({ children }) => {
         }
     }, [open, type, newAttachments]);
 
+    useEffect(() => {
+        return () => {
+            setAttachments([]);
+            setNewAttachments(false);
+        }
+    }, []);
+
     const value = {
         attachments,
         addAttachment,

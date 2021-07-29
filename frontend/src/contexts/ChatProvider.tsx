@@ -48,7 +48,12 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
             }
         })
 
-        return () => socket.off('send-message');
+        return () => {
+            socket.off('send-message');
+            setMessages([]);
+            setUnread(0);
+            setNotification([]);
+        }
     }, []);
     useEffect(() => {
         setTimeout(() => {
