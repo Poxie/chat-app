@@ -8,8 +8,7 @@ import { SettingsDropdown } from "./SettingsDropdown";
 
 export const SettingsModal = () => {
     const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
-    const [auto, setAuto] = useState(0);
-    const { setModal } = useModal();
+    const { close } = useModal();
 
     useEffect(() => {
         navigator.mediaDevices.enumerateDevices().then(setDevices);
@@ -31,7 +30,7 @@ export const SettingsModal = () => {
                 header={'Camera'}
             />
             <Flex justifyContent={'flex-end'} className="settings-button">
-                <Button onClick={() => setModal(null)}>
+                <Button onClick={close}>
                     Close
                 </Button>
             </Flex>

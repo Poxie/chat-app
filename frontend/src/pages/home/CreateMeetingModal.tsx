@@ -21,13 +21,13 @@ const generateCode = () => {
 }
 export const CreateMeetingModal = () => {
     const history = useHistory();
-    const { setModal } = useModal();
+    const { close } = useModal();
     const [code, setCode] = useState(generateCode());
 
     const createMeeting = () => {
         if(!code) return;
         history.push(`/${code}`);
-        setModal(null);
+        close();
     }
 
     return(

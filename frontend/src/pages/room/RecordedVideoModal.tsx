@@ -9,7 +9,7 @@ interface Props {
 }
 
 export const RecordedVideoModal: React.FC<Props> = ({ video }) => {
-    const { setModal } = useModal();
+    const { close } = useModal();
 
     return(
         <Modal>
@@ -17,7 +17,7 @@ export const RecordedVideoModal: React.FC<Props> = ({ video }) => {
                 <ModalHeader text={`Recorded Meeting`} />
                 <video src={video} controls></video>
                 <ModalFooter>
-                    <Button type={'secondary'} onClick={() => setModal(null)}>
+                    <Button type={'secondary'} onClick={close}>
                         Close
                     </Button>
                     <a href={video} target="_blank" download={`meeting-recording-${Date.now().toString()}`}>
