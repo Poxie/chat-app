@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import './Input.css'
 
 interface Props {
@@ -6,10 +6,12 @@ interface Props {
     onSubmit?: (value: string) => void;
     onChange?: (value: string) => void;
     disabled?: boolean;
+    defaultValue?: string;
+    replaceString?: [string, string];
 }
 
-export const Input: React.FC<Props> = ({ placeholder, onSubmit, onChange, disabled }) => {
-    const [value, setValue] = useState('');
+export const Input: React.FC<Props> = ({ placeholder, onSubmit, onChange, disabled, defaultValue, replaceString }) => {
+    const [value, setValue] = useState(defaultValue || '');
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -19,8 +21,10 @@ export const Input: React.FC<Props> = ({ placeholder, onSubmit, onChange, disabl
     };
 
     const handleChange = useMemo(() => (value: string) => {
-        if(onChange) onChange(value);
-        setValue(value);
+        let tempValue = value;
+        if(replaceString) tempValue = tempValue.replaceAll(replaceString[0], replaceString[1]);
+        if(onChange) onChange(tempValue);
+        setValue(tempValue);
     }, []);
 
     return(
