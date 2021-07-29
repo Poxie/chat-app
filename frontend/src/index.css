@@ -21,13 +21,20 @@
   --row-items: 1;
 }
 
+@font-face {
+  font-family: 'Helvetica Nee';
+  font-style: normal;
+  font-weight: 500;
+  src: url('https://fonts.cdnfonts.com/s/29136/Helvetica25UltraLight_22433.woff') format('woff');
+}
+
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  font-family: 'Helvetica Neue', sans-serif;
+  font-family: 'Open Sans', sans-serif;
   background-color: var(--primary-background);
   overflow: hidden;
 }
@@ -88,6 +95,7 @@ a {
   border-radius: 5px;
   opacity: 0;
   transition: opacity .15s, transform .15s;
+  font-weight: bold;
 }
 [data-tooltip]:hover::after {
   opacity: 1;
@@ -112,4 +120,7 @@ a {
 }
 .back-drop {
   pointer-events: all;
+}
+.header {
+  font-weight: bold;
 }
