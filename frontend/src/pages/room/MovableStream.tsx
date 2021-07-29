@@ -52,6 +52,7 @@ export const MovableStream: React.FC<Props> = ({ user, stream, hasCamera, isMute
                 stream={stream}
                 user={selfUser}
                 isSelfStream={true}
+                key={stream.id}
             />
         </MovableElement>
     )
