@@ -22,10 +22,8 @@
 }
 
 @font-face {
-  font-family: 'Helvetica Nee';
-  font-style: normal;
-  font-weight: 500;
-  src: url('https://fonts.cdnfonts.com/s/29136/Helvetica25UltraLight_22433.woff') format('woff');
+  font-family: 'Helvetica Neue';
+  src: url('./fonts/HelveticaNeueBold.ttf');
 }
 
 * {
@@ -34,7 +32,7 @@
 
 body {
   margin: 0;
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Helvetica Neue';
   background-color: var(--primary-background);
   overflow: hidden;
 }
