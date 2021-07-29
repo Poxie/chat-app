@@ -261,9 +261,11 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
     } else if(selfMuted) {
         topVisuals = <DeafenedIcon />
     }
- 
+
+    const classNames = ['user', isSpeaking ? 'is-speaking' : '', disconnected ? 'disconnected' : '', connecting ? 'connecting' : '', selfMuted ? 'self-muted' : ''];
+    const className = classNames.filter(name => name !== '').join(' ');
     return(
-        <div data-order={orderId} className={`user${isSpeaking ? ' is-speaking' : ''}${disconnected ? ' disconnected' : ''}${connecting ? ' connecting' : ''}${selfMuted ? ' self-muted' : ''}`} ref={container}>
+        <div data-order={orderId} className={className} ref={container}>
             <div className="user-top">
                 {topVisuals}
             </div>
