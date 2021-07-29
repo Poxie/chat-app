@@ -14,6 +14,7 @@ import { RequestMediaType } from "../types/RequestMediaType";
 import { useModal } from "./ModalProvider";
 import { RecordedVideoModal } from "../pages/room/RecordedVideoModal";
 import { useAttachments } from "./AttachmentProvider";
+import { RoomState } from "../types/RoomState";
 
 const socket = io('http://localhost:3001');
 
@@ -57,18 +58,7 @@ export const generateId = () => {
     return id;
 }
 
-interface States {
-    selfStream: null | MediaStream;
-    presentation: any,
-    streams: Stream[];
-    isMuted: boolean;
-    hasCamera: boolean;
-    isConnected: boolean;
-    isRecording: null | typeof MediaRecorder;
-    isCurrentlyRecording: false | User;
-    [x: string]: any;
-}
-const initialState: States = {
+const initialState: RoomState = {
     selfStream: null,
     presentation: null,
     streams: [],
@@ -83,8 +73,7 @@ interface ReducerAction {
     property: any;
     payload: any;
 }
-
-const reducer = (state: States, action: ReducerAction) => {
+const reducer = (state: RoomState, action: ReducerAction) => {
     if(!state) return initialState;
     if(!action) return state;
     if(!action.type) action.type = 'simple-property';
@@ -166,7 +155,9 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         // @ts-ignore
         return navigator.mediaDevices[type]({
             video: {
-                deviceId: videoDeviceId || devices['video']
+                deviceId: videoDeviceId || devices['video'],
+                // @ts-ignore
+                mediaSource: 'screen'
             },
             audio: {
                 deviceId: audioDeviceId || devices['audio']
