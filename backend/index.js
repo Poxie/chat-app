@@ -44,9 +44,9 @@ io.on('connection', socket => {
         console.log('record start received');
         socket.broadcast.to(roomId).emit('record-start', ({ user }));
     })
-    socket.on('record-stop', ({ roomId, user, blob }) => {
+    socket.on('record-stop', ({ roomId, user, blob, canceled }) => {
         console.log('record stop received');
-        socket.broadcast.to(roomId).emit('record-stop', ({ user, blob }));
+        socket.broadcast.to(roomId).emit('record-stop', ({ user, blob, canceled }));
     })
     socket.on('send-message', ({ roomId, content, author }) => {
         console.log('received message');

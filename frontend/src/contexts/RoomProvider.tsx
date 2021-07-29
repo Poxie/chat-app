@@ -278,8 +278,9 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         socket.on('record-start', ({ user }) => {
             dispatch({property: 'isCurrentlyRecording', payload: user});
         })
-        socket.on('record-stop', ({ user, blob }) => {
+        socket.on('record-stop', ({ user, blob, canceled }) => {
             dispatch({property: 'isCurrentlyRecording', payload: false});
+            if(canceled) return setFeedback(`${user.username} canceled the recording.`);
             setFeedback(`${user.username} stopped recording`);
             addAttachment('video', blob, true);
         })
@@ -414,7 +415,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     }, []);
 
     // Toggle record meeting
-    const record = useMemo(() => async (state: boolean) => {
+    const record = useMemo(() => async (state: boolean, recording?: any) => {
         if(!selfStream) return;
         if(state) {
             recordedChunks.current = [];
@@ -424,7 +425,19 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             socket.emit('record-start', ({ roomId, user: selfUser.current }));
             dispatch({property: 'isCurrentlyRecording', payload: selfUser.current});
 
+            // Adding a cancel check
+            let canceledRecording = false;
+            stream.getTracks()[0].onended = () => canceledRecording = true;
+
             await new Promise((resolve, reject) => setTimeout(() => resolve(true), 5000));
+
+            // If cancel, notify everyone and return
+            if(canceledRecording) {
+                socket.emit('record-stop', ({ roomId, user: selfUser.current, canceled: true }));
+                dispatch({property: 'isCurrentlyRecording', payload: false});
+                setFeedback('You canceled the recording.');
+                return;
+            }
 
             // Merging all audio devices
             const audioContext = new AudioContext();
@@ -453,30 +466,43 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             recorder.start();
             recorder.ondataavailable = (e: any) => recordedChunks.current.push(e.data);
             dispatch({property: 'isRecording', payload: {recorder, stream}});
+
+            // Generating video if you click on stop browser notification
+            stream.getTracks()[0].onended = () => {
+                record(false, {recorder, stream});
+            };
         } else {
-            if(!isRecording) return;
-            isRecording.recorder.stop();
-            isRecording.stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
-
-            setTimeout(() => {
-                var blob = new Blob(recordedChunks.current, {
-                    type: "video/webm"
-                });
-                var url = URL.createObjectURL(blob);
-
-                // Notifying participants of record event
-                socket.emit('record-stop', ({ user: selfUser.current, roomId, blob: url }));
-
-                // Adding to attachment context
-                addAttachment('video', url, true);
-
-                setModal(<RecordedVideoModal video={url} />)
-
-                dispatch({property: 'isRecording', payload: null});
-                dispatch({property: 'isCurrentlyRecording', payload: false});
-            }, 100);
+            if(!isRecording && !recording) return;
+            if(isRecording) {
+                isRecording.recorder.stop();
+            } else {
+                recording.recorder.stop();
+            }
+            generateRecordedVideo(recording || isRecording);
         }
     }, [isRecording, streams, selfStream]);
+
+    const generateRecordedVideo = useMemo(() => (isRecording: any) => {
+        isRecording.stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
+
+        setTimeout(() => {
+            var blob = new Blob(recordedChunks.current, {
+                type: "video/webm"
+            });
+            var url = URL.createObjectURL(blob);
+
+            // Notifying participants of record event
+            socket.emit('record-stop', ({ user: selfUser.current, roomId, blob: url }));
+
+            // Adding to attachment context
+            addAttachment('video', url, true);
+
+            setModal(<RecordedVideoModal video={url} />)
+
+            dispatch({property: 'isRecording', payload: null});
+            dispatch({property: 'isCurrentlyRecording', payload: false});
+        }, 100);
+    }, []);
 
     const value = {...state,
         ...{
