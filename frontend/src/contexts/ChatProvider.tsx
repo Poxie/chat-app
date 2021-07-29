@@ -28,6 +28,10 @@ export const ChatProvider: React.FC<Props> = ({ children }) => {
 
     useEffect(() => {
         isOpen.current = open && type === 'chat';
+        if(isOpen.current) {
+            setUnread(0);
+            closeNotifications();
+        };
     }, [open, type]);
 
     const sendMessage = useMemo(() => (value: string) => {
