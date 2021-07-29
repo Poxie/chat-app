@@ -7,7 +7,6 @@
     background-color: var(--input-background);
     border-radius: 3px;
     position: relative;
-    min-height: 43px;
 }
 .active-tab::after {
     content: '';
