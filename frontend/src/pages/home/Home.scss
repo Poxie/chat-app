@@ -11,7 +11,7 @@
     }
     .button {
         max-height: 100%;
-        padding: 6px 20px;
+        padding: 14px 20px;
         display: flex;
         align-items: center;
         white-space: nowrap;
@@ -43,7 +43,8 @@
 
     input {
         border-radius: 5px !important;
-        padding: 16px 18px;
+        padding: 16px 18px !important;
+        background-color: var(--secondary-background) !important;
     }
     .button {
         overflow: hidden;
@@ -56,11 +57,11 @@
         margin-right: 50px;
 
         &:hover {
-            svg {
-                left: 50%;
-            }
             .button-content {
                 margin-left: -100%;
+            }
+            .second-arrow {
+                left: 50%;
             }
         }
     }
@@ -68,7 +69,7 @@
         transition: margin-left .4s;
         min-width: 100%;
     }
-    svg {
+    .second-arrow {
         position: absolute;
         left: 150%;
         top: 50%;
