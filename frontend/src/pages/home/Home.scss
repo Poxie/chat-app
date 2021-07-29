@@ -11,7 +11,7 @@
     }
     .button {
         max-height: 100%;
-        padding: 6px 15px;
+        padding: 6px 20px;
         display: flex;
         align-items: center;
         white-space: nowrap;
@@ -43,6 +43,7 @@
 
     input {
         border-radius: 5px !important;
+        padding: 16px 18px;
     }
     .button {
         overflow: hidden;
