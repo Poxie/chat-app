@@ -603,3 +603,25 @@
 .attachment:last-child {
     margin-bottom: 0;
 }
+.new-attachments {
+    white-space: nowrap;
+    position: absolute;
+    top: -40px;
+    color: var(--primary-text);
+    background-color: var(--primary-color);
+    padding: 5px 9px;
+    border-radius: 5px;
+
+    &::after {
+        border: 6px solid;
+        border-top-color: var(--primary-color);
+        border-right-color: transparent;
+        border-left-color: transparent;
+        border-bottom-color: transparent;
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+}

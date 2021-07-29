@@ -18,15 +18,15 @@ function App() {
             <ModalProvider>
               <AuthenticationProvider>
                 <FeedbackProvider>
-                  <AttachmentProvider>
-                    <RoomProvider>
-                      <SidebarProvider>
-                          <ChatProvider>
-                            <Room />
-                          </ChatProvider>
-                      </SidebarProvider>
-                    </RoomProvider>
-                  </AttachmentProvider>
+                  <SidebarProvider>
+                    <AttachmentProvider>
+                      <RoomProvider>
+                        <ChatProvider>
+                          <Room />
+                        </ChatProvider>
+                      </RoomProvider>
+                    </AttachmentProvider>
+                  </SidebarProvider>
                 </FeedbackProvider>
               </AuthenticationProvider>
             </ModalProvider>

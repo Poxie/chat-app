@@ -1,4 +1,5 @@
 import { Flex } from "../../components/Flex";
+import { useAttachments } from "../../contexts/AttachmentProvider";
 import { useChat } from "../../contexts/ChatProvider";
 import { useModal } from "../../contexts/ModalProvider";
 import { useRoom } from "../../contexts/RoomProvider"
@@ -16,6 +17,7 @@ import { UnreadMarker } from "./UnreadMarker";
 export const Controls = () => {
     const { toggleMute, toggleCamera, isMuted, hasCamera, leaveRoom, present, presentation, record, isRecording } = useRoom();
     const { unread } = useChat();
+    const { newAttachments } = useAttachments();
     const { toggleSidebar, open, type } = useSidebar();
     const { setModal } = useModal();
 
@@ -63,8 +65,13 @@ export const Controls = () => {
                 <ControlButton
                     active={open && type === 'attachments'}
                     onClick={() => toggleSidebar(!open, 'attachments')}
-                    tooltip={'Attachments'}
+                    tooltip={!newAttachments ? 'Attachments' : null}
                 >
+                    {newAttachments && (
+                        <span className="new-attachments">
+                            There are new attachments
+                        </span>
+                    )}
                     <AttachmentIcon />
                 </ControlButton>
                 <ControlButton
