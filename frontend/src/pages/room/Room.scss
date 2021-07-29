@@ -98,6 +98,9 @@
         margin-top: 30px;
         font-size: 16px;
     }
+    .waiting-stream {
+        max-width: calc(100% - 400px);
+    }
     .user {
         position: relative;
         width: 500px;
@@ -623,5 +626,30 @@
         top: 100%;
         left: 50%;
         transform: translateX(-50%);
+    }
+}
+
+@media only screen and  (max-width: 600px) {
+    .waiting-container {
+        display: flex;
+        flex-direction: column;
+        padding: 15px;
+        margin-top: 100px;
+
+        .button {
+            width: 100%;
+        }
+    }
+    .waiting-stream {
+        max-width: 100% !important;
+        flex-direction: column;
+        align-items: center;
+        order: 1;
+    }
+    .waiting-room {
+        .header {
+            margin-top: 0;
+            margin-left: 0;
+        }
     }
 }

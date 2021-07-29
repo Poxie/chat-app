@@ -30,8 +30,8 @@ export const WaitingRoom = () => {
     const singular = members === 1;
     return(
         <Flex className="waiting-room" justifyContent={'center'}>
-            <Flex className="waiting-container" alignItems={'center'} flexWrap={'wrap'}>
-                <Flex alignItems={'center'} flexDirection={'column'}>
+            <Flex className="waiting-container" alignItems={'center'}>
+                <Flex className={'waiting-stream'} alignItems={'center'} flexDirection={'column'}>
                     {selfStream && (
                         <Stream 
                             hasCamera={hasCamera}
