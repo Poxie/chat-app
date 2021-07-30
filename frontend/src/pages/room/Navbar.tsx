@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Flex } from "../../components/Flex";
 import { useAuthentication } from "../../contexts/AuthenticationProvider";
 import { useRoom } from "../../contexts/RoomProvider";
-import { MinimizeIcon } from "./MinimizeIcon";
+import { MinimizeIcon } from "../../icons/MinimizeIcon";
 import { Stream } from "./Stream";
 
 const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];

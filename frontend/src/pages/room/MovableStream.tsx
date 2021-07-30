@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { MovableElement } from "../../components/MovableElement";
+import { MinimizeIcon } from "../../icons/MinimizeIcon";
 import { ContextUser } from "../../types/AuthenticationContext";
-import { MinimizeIcon } from "./MinimizeIcon";
 import { Stream } from "./Stream";
 
 interface Props {
