@@ -15,6 +15,7 @@ import { useModal } from "./ModalProvider";
 import { RecordedVideoModal } from "../pages/room/RecordedVideoModal";
 import { useAttachments } from "./AttachmentProvider";
 import { WEBSOCKET_ENDPOINT, PEER_SERVER_ENDPOINT } from '../config.json';
+import { WarningModal } from "../pages/room/WarningModal";
 
 const socket = io(WEBSOCKET_ENDPOINT);
 
@@ -246,7 +247,8 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         call.on('stream', userVideoStream => {
             if(list[call.peer]) return;
             list[call.peer] = call;
-            const stream = getNewStream(userVideoStream, user, userIsMuted, userHasCamera, false, streamIsPresentation);
+            const stream = getNewStream(userVideoStream, user, userIsMuted, userHasCamera, false, streamIsPresentation, streamIsPresentation);
+            console.log(streamIsPresentation);
             dispatch({type: 'add-stream', property: 'streams', payload: stream});
         })
     }, []);
@@ -389,6 +391,17 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     // Toggle screenshare
     const present = useMemo(() => async (state: MediaStream | null) => {
         if(!state) {
+            // Making sure only one screenshare is on at a time
+            const currentPresentation = streams.filter(stream => stream.isPresentation)[0];
+            if(currentPresentation) {
+                return setModal(
+                    <WarningModal 
+                        title={'Too many presentations'}
+                        description={`Unfortunately, due to screenshares being extremely resource demanding, only one person may present at a time. Ask ${currentPresentation.user.username} to stop presenting.`}
+                    />
+                )
+            }
+
             // Creating a new connection for the screenshare
             const shareSocket = io(WEBSOCKET_ENDPOINT, {secure: true});
             const { peer, stream, user } = await createMemberConnection(shareSocket, selfUser.current, false, true, 'getDisplayMedia', true);
@@ -426,7 +439,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             presentationPeer.current.disconnect();
             dispatch({type: 'close-presentation', property: 'presentation', payload: null});
         }
-    }, []);
+    }, [streams]);
 
     // Toggle record meeting
     const record = useMemo(() => async (state: boolean, recording?: any) => {
