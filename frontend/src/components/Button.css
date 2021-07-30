@@ -19,3 +19,6 @@
 .button.secondary {
     background-color: var(--secondary-background);
 }
+.button.transparent {
+    background-color: transparent;
+}

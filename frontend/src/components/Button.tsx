@@ -3,7 +3,7 @@ import { Clickable } from './Clickable';
 
 interface Props {
     children: any;
-    type?: 'primary' | 'secondary';
+    type?: 'primary' | 'secondary' | 'transparent';
     style?: any;
     rounded?: boolean;
     onClick?: () => void;

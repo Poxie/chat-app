@@ -15,25 +15,36 @@
     }
 }
 .modal {
-    padding: 20px;
     border-radius: var(--border-radius);
     width: 500px;
     max-width: 90%;
     background-color: var(--secondary-background);
     color: var(--primary-text);
+
+    &>div {
+        padding: 20px;
+    }
 }
 .modal-header {
     font-size: 18px;
-    margin-bottom: 20px;
     font-weight: bold;
 
     .title {
         font-size: 16px;
         // text-transform: uppercase;
+        margin-bottom: 15px;
+    }
+    span {
+        margin-top: 15px;
+        display: block;
+        font-size: 15px;
+        font-family: 'Roboto';
+        font-weight: 400;
+        color: var(--primary-text);
     }
 }
 .modal-footer {
-    padding-top: 20px;
+    background-color: rgba(0,0,0,.2);
 
     .button {
         margin-left: 20px;
