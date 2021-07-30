@@ -79,6 +79,9 @@ const initialState: States = {
     isRecording: null,
     isCurrentlyRecording: false
 }
+const init = (initialState: States) => {
+    return initialState;
+}
 interface ReducerAction {
     type?: any;
     property: any;
@@ -129,6 +132,14 @@ const reducer = (state: States, action: ReducerAction) => {
             })
             return updateState('streams', newStreams);
         }
+        case 'leave-room':
+            const { isMuted, hasCamera, selfStream } = state;
+            const newState = {...initialState, ...{
+                isMuted,
+                hasCamera,
+                selfStream
+            }}
+            return init(newState);
         default:
             return state;
     }
@@ -145,7 +156,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     const { devices } = useDevice();
     const { addAttachment } = useAttachments();
     
-    const [state, dispatch] = useReducer(reducer, initialState);
+    const [state, dispatch] = useReducer(reducer, initialState, init);
     const { selfStream, streams, isConnected, isRecording } = state;
 
     const presentationPeer = useRef<any>(null);
@@ -189,10 +200,9 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         return requestUserMedia(type)
             .then(stream => {
                 const id = generateId();
-                const parts = PEER_SERVER_ENDPOINT.split(':');
                 const peer = new Peer(id, {
-                    host: parts[0],
-                    port: parseInt(parts[1])
+                    host: PEER_SERVER_ENDPOINT,
+                    secure: true
                 })
                 let newUser = {...user, ...{id}};
                 peer.on('open', id => {
@@ -245,13 +255,13 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
         requestUserMedia().then(stream => {
             dispatch({property: 'selfStream', payload: stream});
         });
-    }, []);
+    }, [roomId]);
 
     const leaveRoom = useMemo(() => () => {
-        dispatch({property: 'isConnected', payload: false});
-        dispatch({property: 'streams', payload: []});
         const { id, username } = selfUser.current;
         socket.emit('leave-room', {roomId, user: {username, id}});
+
+        dispatch({type: 'leave-room', property: null, payload: null});
     }, [roomId]);
     const joinRoom = useMemo(() => () => {
         dispatch({property: 'isConnected', payload: true});
@@ -378,7 +388,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     const present = useMemo(() => async (state: MediaStream | null) => {
         if(!state) {
             // Creating a new connection for the screenshare
-            const shareSocket = io(WEBSOCKET_ENDPOINT);
+            const shareSocket = io(WEBSOCKET_ENDPOINT, {secure: true});
             const { peer, stream, user } = await createMemberConnection(shareSocket, selfUser.current, false, true, 'getDisplayMedia', true);
 
             // If user join, send persentation to them as well
