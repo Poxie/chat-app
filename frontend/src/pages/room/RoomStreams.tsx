@@ -32,7 +32,7 @@ export const RoomStreams = () => {
                             notPinnedIndex={notPinnedIndex}
                             selfMuted={stream.selfMuted}
                             isPresentation={stream.isPresentation}
-                            key={stream.stream.id}
+                            key={stream?.stream?.id || stream.user.id}
                         />
                     )
                 })}

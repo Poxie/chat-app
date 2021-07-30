@@ -9,6 +9,7 @@ import { CameraButton } from "./CameraButton";
 import { ControlButton } from "./ControlButton";
 import { MicButton } from "./MicButton";
 import { Stream } from "./Stream";
+import { WaitingHeader } from "./WaitingHeader";
 
 export const WaitingRoom = () => {
     const { selfStream, hasCamera, isMuted, toggleCamera, toggleMute, joinRoom, socket, roomId } = useRoom();
@@ -32,15 +33,13 @@ export const WaitingRoom = () => {
         <Flex className="waiting-room" justifyContent={'center'}>
             <Flex className="waiting-container" alignItems={'center'}>
                 <Flex className={'waiting-stream'} alignItems={'center'} flexDirection={'column'}>
-                    {selfStream && (
-                        <Stream 
-                            hasCamera={hasCamera}
-                            isMuted={isMuted}
-                            stream={selfStream}
-                            user={{username: user.username, id: JSON.stringify(Math.random())}}
-                            isSelfStream={true}
-                        />
-                    )}
+                    <Stream 
+                        hasCamera={hasCamera}
+                        isMuted={isMuted}
+                        stream={selfStream}
+                        user={{username: user.username, id: JSON.stringify(Math.random())}}
+                        isSelfStream={true}
+                    />
                     <Flex className="waiting-controls">
                         <MicButton 
                             isMuted={isMuted}
@@ -52,19 +51,11 @@ export const WaitingRoom = () => {
                         />
                     </Flex>
                 </Flex>
-                <Flex className="header" flexDirection={'column'} alignItems={'center'}>
-                    <span>
-                        Ready to join the meeting?
-                    </span>
-                    {members !== null && (
-                        <span className="silent">
-                            There {singular ? 'is' : 'are'} {members} {singular ? 'member' : 'members'} in this meeting
-                        </span>
-                    )}
-                    <Button rounded={true} onClick={joinRoom}>
-                        Join meeting
-                    </Button>
-                </Flex>
+                <WaitingHeader 
+                    joinRoom={joinRoom}
+                    members={members}
+                    stream={selfStream}
+                />
             </Flex>
         </Flex>
     )

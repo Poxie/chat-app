@@ -1,7 +1,7 @@
 import { User } from "./User";
 
 export interface Stream {
-    stream: MediaStream;
+    stream: MediaStream | null;
     user: User;
     isMuted: boolean;
     hasCamera: boolean;

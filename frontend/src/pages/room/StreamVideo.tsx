@@ -1,8 +1,10 @@
 import { memo, useEffect, useRef } from "react";
 import hark from 'hark';
+import { LoadingIcon } from "../../components/LoadingIcon";
+import { Flex } from "../../components/Flex";
 
 interface Props {
-    stream: MediaStream;
+    stream: MediaStream | null;
     setIsSpeaking?: (state: boolean) => void;
     isSelfStream?: boolean;
     selfMuted?: boolean;
@@ -12,7 +14,7 @@ export const StreamVideo: React.FC<Props> = memo(({ setIsSpeaking, stream, isSel
     const ref = useRef<null | HTMLVideoElement>(null);
 
     useEffect(() => {
-        if(!ref.current || !stream.id) return;
+        if(!ref.current || !stream) return;
         
         ref.current.srcObject = stream;
         if(!setIsSpeaking) return;
@@ -33,7 +35,15 @@ export const StreamVideo: React.FC<Props> = memo(({ setIsSpeaking, stream, isSel
                 setIsSpeaking(false);
             })
         })
-    }, []);
+    }, [stream]);
+    
+    if(!stream) {
+        return(
+            <Flex className="loading-stream" alignItems={'center'} justifyContent={'center'} style={{width: '100%', height: '100%'}}>
+                <LoadingIcon />
+            </Flex>
+        )
+    }
 
     return(
         <video ref={ref} muted={isSelfStream || selfMuted}></video>

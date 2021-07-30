@@ -113,6 +113,7 @@ const reducer = (state: States, action: ReducerAction) => {
                 if(stream.user.id !== payload) {
                     return stream;
                 } else {
+                    if(!stream.stream) return stream;
                     stream.stream.getTracks().forEach(track => track.stop());
                 }
             })
@@ -120,7 +121,7 @@ const reducer = (state: States, action: ReducerAction) => {
         }
         case 'stream-property': {
             const newStreams = state.streams.map(stream => {
-                if(stream.user.id === payload.userId || stream.stream.id === payload.streamId) {
+                if(stream.user.id === payload.userId || stream?.stream?.id === payload.streamId) {
                     // @ts-ignore
                     stream[payload.property] = payload.value;
                 } else {
@@ -252,6 +253,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
 
     // Initiate device permission
     useEffect(() => {
+        dispatch({property: 'selfStream', payload: null});
         requestUserMedia().then(stream => {
             dispatch({property: 'selfStream', payload: stream});
         });
@@ -455,7 +457,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             const audioContext = new AudioContext();
 
             const destination = audioContext.createMediaStreamDestination();
-            const audioSources = streams.map(s => s.stream.getAudioTracks()[0]);
+            const audioSources = streams.map(s => s?.stream?.getAudioTracks()[0]);
             const audioSourcesTracks: MediaStreamAudioSourceNode[] = [];
             audioSources.forEach(track => {
                 if(track) {

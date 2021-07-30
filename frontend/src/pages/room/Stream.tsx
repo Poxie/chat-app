@@ -13,7 +13,7 @@ import { DeafenedIcon } from "./DeafenedIcon";
 import { useSidebar } from "../../contexts/SidebarProvider";
 
 interface Props {
-    stream: MediaStream;
+    stream: MediaStream | null;
     user: User;
     isMuted: boolean;
     hasCamera: boolean;
