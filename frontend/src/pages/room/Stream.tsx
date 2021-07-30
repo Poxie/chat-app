@@ -70,13 +70,13 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
     }, [connecting]);
 
     // Makes sure height doesn't exceed container
-    const checkIfWidthExceeds: any = (width: number, containerHeight: number, amountOfRows: number, isPinned?: boolean) => {
+    const checkIfWidthExceeds: any = useMemo(() => (width: number, containerHeight: number, amountOfRows: number, isPinned?: boolean) => {
         const condition = isPinned ? width * RATIO - SPACING > containerHeight : width * RATIO * amountOfRows > containerHeight;
         if(condition) {
             return checkIfWidthExceeds(width - 1, containerHeight, amountOfRows, isPinned);
         }
         return width;
-    }
+    }, []);
 
     // Getting the length of a certain row
     const getRowLength = useMemo(() => (rowAmount: number, currentRow: number, streamAmount: number) => {
@@ -160,7 +160,10 @@ export const Stream: React.FC<Props> = memo(({ stream, user, hasCamera, isMuted,
             left += rowIndex * width;
 
             // Adding extra spacing between items
-            left += SPACING + SPACING * rowIndex;
+            left += SPACING * rowIndex;
+
+            const emptySpace = availableWidth - (width * rowLength - SPACING * (streamAmount >= 4 ? 4 : 2));
+            left += emptySpace / 2;
         }
         updateStreamStyle('left', `${left}px`);
     }, [streamAmount, orderId]);
