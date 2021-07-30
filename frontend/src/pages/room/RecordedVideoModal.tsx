@@ -12,21 +12,20 @@ export const RecordedVideoModal: React.FC<Props> = ({ video }) => {
     const { close } = useModal();
 
     return(
-        <Modal>
-            <div className="recorded-video-modal">
-                <ModalHeader text={`Recorded Meeting`} />
+        <Modal className="recorded-video-modal">
+            <ModalHeader text={`Recorded Meeting`}>
                 <video src={video} controls></video>
-                <ModalFooter>
-                    <Button type={'secondary'} onClick={close}>
-                        Close
+            </ModalHeader>
+            <ModalFooter>
+                <Button type={'transparent'} onClick={close}>
+                    Close
+                </Button>
+                <a href={video} target="_blank" download={`meeting-recording-${Date.now().toString()}`}>
+                    <Button>
+                        Save video
                     </Button>
-                    <a href={video} target="_blank" download={`meeting-recording-${Date.now().toString()}`}>
-                        <Button>
-                            Save video
-                        </Button>
-                    </a>
-                </ModalFooter>
-            </div>
+                </a>
+            </ModalFooter>
         </Modal>
     )
 }
