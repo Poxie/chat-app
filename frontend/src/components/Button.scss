@@ -6,18 +6,24 @@
     cursor: pointer;
     transition: opacity .2s;
     text-align: center;
-}
-.button:hover {
-    opacity: .8;
+    transition: background-color .2s;
 }
 .button.rounded {
     border-radius: 120px;
 }
 .button.primary {
     background-color: var(--primary-color);
+
+    &:hover {
+        background-color: var(--primary-color-hover);
+    }
 }
 .button.secondary {
     background-color: var(--secondary-background);
+
+    &:hover {
+        background-color: var(--secondary-background-hover);
+    }
 }
 .button.transparent {
     background-color: transparent;
