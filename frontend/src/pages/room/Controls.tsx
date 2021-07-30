@@ -4,6 +4,7 @@ import { useChat } from "../../contexts/ChatProvider";
 import { useModal } from "../../contexts/ModalProvider";
 import { useRoom } from "../../contexts/RoomProvider"
 import { useSidebar } from "../../contexts/SidebarProvider";
+import { SettingsModal } from "../../modals/SettingsModal";
 import { AttachmentIcon } from "./AttachmentIcon";
 import { CameraButton } from "./CameraButton";
 import { ControlButton } from "./ControlButton";
@@ -11,7 +12,6 @@ import { IsMutedIcon } from "./IsMutedIcon";
 import { MicButton } from "./MicButton";
 import { PresentIcon } from "./PresentIcon";
 import { RecordIcon } from "./RecordIcon";
-import { SettingsModal } from "./SettingsModal";
 import { UnreadMarker } from "./UnreadMarker";
 
 export const Controls = () => {

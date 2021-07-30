@@ -1,5 +1,6 @@
-import { Dropdown } from "../../components/Dropdown"
-import { useDevice } from "../../contexts/DeviceProvider"
+import { Dropdown } from "../components/Dropdown";
+import { useDevice } from "../contexts/DeviceProvider";
+
 
 interface Props {
     devices: MediaDeviceInfo[];

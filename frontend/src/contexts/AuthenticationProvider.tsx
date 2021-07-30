@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react"
 import { useParams } from "react-router-dom";
-import { UserModal } from "../components/UserModal";
-import { WarningModal } from "../pages/room/WarningModal";
+import { UserModal } from "../modals/UserModal";
+import { WarningModal } from "../modals/WarningModal";
 import { AuthenticationContext as AuthenticationContextType, ContextUser } from "../types/AuthenticationContext";
 import { Params } from "../types/Params";
 import { useModal } from "./ModalProvider";

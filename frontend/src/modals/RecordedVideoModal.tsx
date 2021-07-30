@@ -1,8 +1,8 @@
-import { Button } from "../../components/Button"
-import { Modal } from "../../components/Modal"
-import { ModalFooter } from "../../components/ModalFooter"
-import { ModalHeader } from "../../components/ModalHeader"
-import { useModal } from "../../contexts/ModalProvider"
+import { Button } from "../components/Button";
+import { Modal } from "../components/Modal";
+import { ModalFooter } from "../components/ModalFooter";
+import { ModalHeader } from "../components/ModalHeader";
+import { useModal } from "../contexts/ModalProvider";
 
 interface Props {
     video: string;

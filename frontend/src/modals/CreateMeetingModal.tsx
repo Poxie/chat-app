@@ -1,12 +1,11 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useHistory } from "react-router-dom";
-import { Button } from "../../components/Button";
-import { Flex } from "../../components/Flex";
-import { Input } from "../../components/Input"
-import { Modal } from "../../components/Modal"
-import { ModalFooter } from "../../components/ModalFooter";
-import { ModalHeader } from "../../components/ModalHeader"
-import { useModal } from "../../contexts/ModalProvider";
+import { Button } from "../components/Button";
+import { Input } from "../components/Input";
+import { Modal } from "../components/Modal";
+import { ModalFooter } from "../components/ModalFooter";
+import { ModalHeader } from "../components/ModalHeader";
+import { useModal } from "../contexts/ModalProvider";
 
 const generateCode = () => {
     const opts = 'abcdefghijklmnopqrstuvwxyz';

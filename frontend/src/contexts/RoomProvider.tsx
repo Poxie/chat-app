@@ -12,10 +12,10 @@ import { DefaultEventsMap } from "socket.io-client/build/typed-events";
 import { ContextUser } from "../types/AuthenticationContext";
 import { RequestMediaType } from "../types/RequestMediaType";
 import { useModal } from "./ModalProvider";
-import { RecordedVideoModal } from "../pages/room/RecordedVideoModal";
 import { useAttachments } from "./AttachmentProvider";
 import { WEBSOCKET_ENDPOINT, PEER_SERVER_ENDPOINT } from '../config.json';
-import { WarningModal } from "../pages/room/WarningModal";
+import { WarningModal } from "../modals/WarningModal";
+import { RecordedVideoModal } from "../modals/RecordedVideoModal";
 
 const socket = io(WEBSOCKET_ENDPOINT);
 

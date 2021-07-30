@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
+import { Button } from "../components/Button";
+import { Input } from "../components/Input";
+import { Modal } from "../components/Modal";
+import { ModalFooter } from "../components/ModalFooter";
+import { ModalHeader } from "../components/ModalHeader";
 import { ContextUser } from "../types/AuthenticationContext";
-import { Button } from "./Button";
-import { Input } from "./Input"
-import { Modal } from "./Modal"
-import { ModalFooter } from "./ModalFooter";
-import { ModalHeader } from "./ModalHeader";
 // import './UserModal.scss';
 
 interface Props {

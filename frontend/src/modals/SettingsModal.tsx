@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react"
-import { Button } from "../../components/Button";
-import { Dropdown } from "../../components/Dropdown";
-import { Flex } from "../../components/Flex";
-import { Modal } from "../../components/Modal"
-import { ModalFooter } from "../../components/ModalFooter";
-import { ModalHeader } from "../../components/ModalHeader";
-import { useModal } from "../../contexts/ModalProvider";
+import { Button } from "../components/Button";
+import { Modal } from "../components/Modal";
+import { ModalFooter } from "../components/ModalFooter";
+import { ModalHeader } from "../components/ModalHeader";
+import { useModal } from "../contexts/ModalProvider";
 import { SettingsDropdown } from "./SettingsDropdown";
 
 export const SettingsModal = () => {
