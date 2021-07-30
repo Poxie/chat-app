@@ -4,6 +4,7 @@ import { Button } from "../../components/Button";
 import { Flex } from "../../components/Flex";
 import { Input } from "../../components/Input"
 import { Modal } from "../../components/Modal"
+import { ModalFooter } from "../../components/ModalFooter";
 import { ModalHeader } from "../../components/ModalHeader"
 import { useModal } from "../../contexts/ModalProvider";
 
@@ -34,19 +35,20 @@ export const CreateMeetingModal = () => {
         <Modal>
             <ModalHeader 
                 text={'Create Meeting Code'}
-            />
-            <Input 
-                defaultValue={code}
-                onChange={setCode}
-                replaceString={[' ', '-']}
-                placeholder={'Create meeting code...'}
-                onSubmit={createMeeting}
-            />
-            <Flex justifyContent={'flex-end'}>
-                <Button style={{marginTop: '20px'}} onClick={createMeeting}>
+            >
+                <Input 
+                    defaultValue={code}
+                    onChange={setCode}
+                    replaceString={[' ', '-']}
+                    placeholder={'Create meeting code...'}
+                    onSubmit={createMeeting}
+                />
+            </ModalHeader>
+            <ModalFooter>
+                <Button onClick={createMeeting}>
                     Create Meeting
                 </Button>
-            </Flex>
+            </ModalFooter>
         </Modal>
     )
 }
