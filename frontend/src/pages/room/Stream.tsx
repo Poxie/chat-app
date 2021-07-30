@@ -1,16 +1,14 @@
 import { memo, useEffect, useMemo, useRef, useState } from "react"
 import { Flex } from "../../components/Flex";
 import { User } from "../../types/User";
-import { IsMutedIcon } from "./IsMutedIcon";
-import { LetterIcon } from "./LetterIcon";
 import { useRoom } from "../../contexts/RoomProvider";
 import { StreamVideo } from "./StreamVideo";
-import { useChat } from "../../contexts/ChatProvider";
-import { PinIcon } from "./PinIcon";
 import { StreamOptions } from "./StreamOptions";
 import { Stream as StreamType } from "../../types/Stream";
-import { DeafenedIcon } from "./DeafenedIcon";
 import { useSidebar } from "../../contexts/SidebarProvider";
+import { IsMutedIcon } from "../../icons/IsMutedIcon";
+import { DeafenedIcon } from "../../icons/DeafenedIcon";
+import { LetterIcon } from "../../icons/LetterIcon";
 
 interface Props {
     stream: MediaStream | null;

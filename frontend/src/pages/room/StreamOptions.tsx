@@ -1,6 +1,6 @@
 import { Flex } from "../../components/Flex"
-import { PinIcon } from "./PinIcon"
-import { SpeakerIcon } from "./SpeakerIcon"
+import { PinIcon } from "../../icons/PinIcon"
+import { SpeakerIcon } from "../../icons/SpeakerIcon"
 
 interface Props {
     isPinned: boolean;

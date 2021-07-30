@@ -1,6 +1,6 @@
 import { Flex } from "../../components/Flex"
+import { LetterIcon } from "../../icons/LetterIcon"
 import { User } from "../../types/User"
-import { LetterIcon } from "./LetterIcon"
 import { Timestamp } from "./Timestamp"
 
 interface Props {

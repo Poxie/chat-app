@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react"
 import { Button } from "../../components/Button";
-import { Flex } from "../../components/Flex";
 import { Attachment as AttachmentType } from "../../types/Attachment"
 
 export const Attachment = ({ type, source, isDownloadable, name }: AttachmentType) => {

@@ -1,5 +1,5 @@
-import { Clickable } from "../../components/Clickable"
-import { Tooltip } from "../../components/Tooltip"
+import { Clickable } from "../components/Clickable"
+import { Tooltip } from "../components/Tooltip"
 import { DeafenedIcon } from "./DeafenedIcon"
 
 interface Props {

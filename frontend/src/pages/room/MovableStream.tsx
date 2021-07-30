@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useState } from "react";
 import { MovableElement } from "../../components/MovableElement";
 import { ContextUser } from "../../types/AuthenticationContext";
 import { MinimizeIcon } from "./MinimizeIcon";

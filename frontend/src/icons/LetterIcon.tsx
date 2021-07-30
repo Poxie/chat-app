@@ -1,4 +1,4 @@
-import { Flex } from "../../components/Flex";
+import { Flex } from "../components/Flex";
 
 interface Props {
     username: string;

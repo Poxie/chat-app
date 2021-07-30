@@ -1,7 +1,5 @@
-import { Button } from "../../components/Button"
 import { Flex } from "../../components/Flex"
-import { Input } from "../../components/Input"
-import { ConnectionIcon } from "./ConnectionIcon";
+import { ConnectionIcon } from "../../icons/ConnectionIcon";
 import './Home.scss';
 import { HomeHeader } from "./HomeHeader";
 import { HomeOptions } from "./HomeOptions";

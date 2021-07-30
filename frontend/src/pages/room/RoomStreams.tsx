@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { Flex } from "../../components/Flex";
 import { useRoom } from "../../contexts/RoomProvider"
 import { Stream } from "./Stream";

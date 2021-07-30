@@ -1,12 +1,8 @@
 import { useEffect, useRef, useState } from "react"
-import { Button } from "../../components/Button";
-import { Clickable } from "../../components/Clickable";
 import { Flex } from "../../components/Flex";
 import { useAuthentication } from "../../contexts/AuthenticationProvider";
 import { useRoom } from "../../contexts/RoomProvider";
-import { User } from "../../types/User";
 import { CameraButton } from "./CameraButton";
-import { ControlButton } from "./ControlButton";
 import { MicButton } from "./MicButton";
 import { Stream } from "./Stream";
 import { WaitingHeader } from "./WaitingHeader";
