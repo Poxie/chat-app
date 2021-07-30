@@ -3,6 +3,8 @@ import { Button } from "../../components/Button";
 import { Dropdown } from "../../components/Dropdown";
 import { Flex } from "../../components/Flex";
 import { Modal } from "../../components/Modal"
+import { ModalFooter } from "../../components/ModalFooter";
+import { ModalHeader } from "../../components/ModalHeader";
 import { useModal } from "../../contexts/ModalProvider";
 import { SettingsDropdown } from "./SettingsDropdown";
 
@@ -18,22 +20,24 @@ export const SettingsModal = () => {
     const video = devices.filter(device => device.kind === 'videoinput');
 
     return(
-        <Modal
-            header={'Device Settings'}
-        >
-            <SettingsDropdown 
-                devices={voice}
-                header={'Microphone'}
-            />
-            <SettingsDropdown 
-                devices={video}
-                header={'Camera'}
-            />
-            <Flex justifyContent={'flex-end'} className="settings-button">
+        <Modal>
+            <ModalHeader
+                text={'Device Settings'}
+            >
+                <SettingsDropdown 
+                    devices={voice}
+                    header={'Microphone'}
+                />
+                <SettingsDropdown 
+                    devices={video}
+                    header={'Camera'}
+                />
+            </ModalHeader>
+            <ModalFooter>
                 <Button onClick={close}>
                     Close
                 </Button>
-            </Flex>
+            </ModalFooter>
         </Modal>
     )
 }
