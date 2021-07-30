@@ -159,7 +159,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     const { addAttachment } = useAttachments();
     
     const [state, dispatch] = useReducer(reducer, initialState, init);
-    const { selfStream, streams, isConnected, isRecording } = state;
+    const { selfStream, streams, isConnected, isRecording, isCurrentlyRecording } = state;
 
     const presentationPeer = useRef<any>(null);
     const selfUser = useRef<any>(null);
@@ -445,6 +445,15 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
     const record = useMemo(() => async (state: boolean, recording?: any) => {
         if(!selfStream) return;
         if(state) {
+            if(isCurrentlyRecording) {
+                return setModal(
+                    <WarningModal 
+                        title={'Too many recordings'}
+                        description={'Another person in this meeting is already recording. You may not start recording while there\'s another recording running.'}
+                    />
+                )
+            }
+
             recordedChunks.current = [];
             const stream = await requestUserMedia('getDisplayMedia');
 
@@ -507,7 +516,7 @@ export const RoomProvider: React.FC<Props> = ({ children }) => {
             }
             generateRecordedVideo(recording || isRecording);
         }
-    }, [isRecording, streams, selfStream]);
+    }, [isCurrentlyRecording, isRecording, streams, selfStream]);
 
     const generateRecordedVideo = useMemo(() => (isRecording: any) => {
         isRecording.stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
