@@ -39,6 +39,7 @@ export const CreateMeetingModal = () => {
                     defaultValue={code}
                     onChange={setCode}
                     replaceString={[' ', '-']}
+                    noCaps={true}
                     placeholder={'Create meeting code...'}
                     onSubmit={createMeeting}
                 />

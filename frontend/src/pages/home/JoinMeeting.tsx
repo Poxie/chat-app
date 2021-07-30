@@ -18,6 +18,8 @@ export const JoinMeeting = () => {
                 placeholder={'Enter code for meeting...'}
                 onChange={setCode}
                 onSubmit={joinMeeting}
+                replaceString={[' ', '-']}
+                noCaps={true}
             />
             <Button type={'secondary'} onClick={joinMeeting}>
                 <Flex alignItems={'center'} justifyContent={'center'}>
