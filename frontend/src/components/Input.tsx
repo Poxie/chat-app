@@ -8,9 +8,10 @@ interface Props {
     disabled?: boolean;
     defaultValue?: string;
     replaceString?: [string, string];
+    noCaps?: boolean;
 }
 
-export const Input: React.FC<Props> = ({ placeholder, onSubmit, onChange, disabled, defaultValue, replaceString }) => {
+export const Input: React.FC<Props> = ({ placeholder, onSubmit, onChange, disabled, defaultValue, replaceString, noCaps }) => {
     const [value, setValue] = useState(defaultValue || '');
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -23,6 +24,7 @@ export const Input: React.FC<Props> = ({ placeholder, onSubmit, onChange, disabl
     const handleChange = useMemo(() => (value: string) => {
         let tempValue = value;
         if(replaceString) tempValue = tempValue.replaceAll(replaceString[0], replaceString[1]);
+        if(noCaps) tempValue = tempValue.toLowerCase();
         if(onChange) onChange(tempValue);
         setValue(tempValue);
     }, []);
